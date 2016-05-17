@@ -86,6 +86,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
+import java.util.regex.Matcher;
 
 import static java.util.stream.Collectors.toList;
 
@@ -475,7 +476,8 @@ public class PipelineRuleParser {
         @Override
         public void exitString(RuleLangParser.StringContext ctx) {
             final String text = unquote(ctx.getText(), '\"');
-            final StringExpression expr = new StringExpression(ctx.getStart(), text);
+            final StringExpression expr = new StringExpression(ctx.getStart(), text.replaceAll("\\\\\\\\",
+                                                                                               Matcher.quoteReplacement("\\")));
             log.trace("STRING: ctx {} => {}", ctx, expr);
             exprs.put(ctx, expr);
         }
