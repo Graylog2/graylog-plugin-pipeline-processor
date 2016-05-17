@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableList.of;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -465,6 +466,15 @@ public class PipelineRuleParserTest extends BaseParserTest {
             assertEquals(1, e.getErrors().size());
             assertEquals(IncompatibleIndexType.class, Iterables.getOnlyElement(e.getErrors()).getClass());
         }
+    }
+
+    @Test
+    public void stringEscaping() {
+        final Rule rule = parser.parseRule(ruleForTest(), false);
+        Message message = new Message("hello test", "source", DateTime.now());
+        final Message msg = evaluateRule(rule, message);
+
+        assertThat(msg.getField("escaped")).isEqualTo("\\s+");
     }
 
     public static class CustomObject {

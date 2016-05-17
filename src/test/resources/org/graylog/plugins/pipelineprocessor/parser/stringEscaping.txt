@@ -1,0 +1,5 @@
+rule "mongodb extraction"
+when true
+then
+    set_field("escaped", "\\s+");
+end
