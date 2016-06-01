@@ -1,9 +1,8 @@
 import React from 'react';
 import { Col, Row } from 'react-bootstrap';
 
-import { Spinner } from 'components/common';
 import LoaderTabs from 'components/messageloaders/LoaderTabs';
-import MessageShow from 'components/search/MessageShow';
+import SimulationPreview from './SimulationPreview';
 
 import SimulatorActions from './SimulatorActions';
 import SimulatorStore from './SimulatorStore';
@@ -22,16 +21,6 @@ const ProcessorSimulator = React.createClass({
     };
   },
 
-  componentDidMount() {
-    this.style.use();
-  },
-
-  componentWillUnmount() {
-    this.style.unuse();
-  },
-
-  style: require('!style/useable!css!./ProcessorSimulator.css'),
-
   _onMessageLoad(message) {
     this.setState({ message: message, simulation: undefined, loading: true, error: undefined });
 
@@ -46,59 +35,6 @@ const ProcessorSimulator = React.createClass({
   },
 
   render() {
-    const streams = {};
-    streams[this.props.stream.id] = this.props.stream;
-
-    let originalMessagePreview;
-    if (this.state.message) {
-      originalMessagePreview = (
-        <MessageShow message={this.state.message}
-                     streams={streams}
-                     disableTestAgainstStream
-                     disableSurroundingSearch
-                     disableFieldActions />
-      );
-    }
-
-    let simulationPreview;
-    if (this.state.simulation) {
-      simulationPreview = (
-        <MessageShow message={this.state.simulation[0]}
-                     streams={streams}
-                     disableTestAgainstStream
-                     disableSurroundingSearch
-                     disableFieldActions
-                     isSimulation />
-      );
-    }
-
-    let diff;
-    if (this.state.loading) {
-      diff = <Spinner />;
-    } else if (this.state.message && this.state.simulation) {
-      diff = (
-        <Row>
-          <Col md={12}>
-            <hr />
-          </Col>
-          <Col md={6}>
-            <h1>Original message</h1>
-            <p>This is the original message loaded from Graylog.</p>
-            <div className="message-preview-wrapper">
-              {originalMessagePreview}
-            </div>
-          </Col>
-          <Col md={6}>
-            <h1>Simulation results</h1>
-            <p>{simulationPreview ? 'This is the result of processing the selected message:' : 'Select a message on the "Load a message" section to see a simulation.'}</p>
-            <div className="message-preview-wrapper">
-              {simulationPreview}
-            </div>
-          </Col>
-        </Row>
-      );
-    }
-
     return (
       <div>
         <Row>
@@ -109,7 +45,11 @@ const ProcessorSimulator = React.createClass({
             <LoaderTabs onMessageLoaded={this._onMessageLoad} disableMessagePreview />
           </Col>
         </Row>
-        {diff}
+        <SimulationPreview stream={this.props.stream}
+                           originalMessage={this.state.message}
+                           simulationResults={this.state.simulation}
+                           isLoading={this.state.loading}
+                           error={this.state.error} />
       </div>
     );
   },
