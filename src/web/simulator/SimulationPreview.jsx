@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, Row } from 'react-bootstrap';
+import { Alert, Col, Row } from 'react-bootstrap';
 
 import { Spinner } from 'components/common';
 import MessageShow from 'components/search/MessageShow';
@@ -57,6 +57,21 @@ const SimulationPreview = React.createClass({
       });
     }
 
+    let errorMessage;
+    if (this.props.error) {
+      errorMessage = (
+        <Alert bsStyle="danger">
+          <p><strong>Error simulating message processing</strong></p>
+          <p>
+            Could not simulate processing of message <em>{this.props.originalMessage.id}</em> in stream{' '}
+            <em>{this.props.stream.title}</em>.
+            <br/>
+            Please try loading the message again, or use another message for the simulation.
+          </p>
+        </Alert>
+      );
+    }
+
     return (
       <Row>
         <Col md={12}>
@@ -73,6 +88,7 @@ const SimulationPreview = React.createClass({
           <h1>Simulation results</h1>
           <p>This is the result of processing the loaded message:</p>
           <div className="message-preview-wrapper">
+            {errorMessage}
             {simulationPreview}
           </div>
         </Col>

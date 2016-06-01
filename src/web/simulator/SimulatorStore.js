@@ -1,7 +1,6 @@
 import Reflux from 'reflux';
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
-import UserNotification from 'util/UserNotification';
 
 import MessageFormatter from 'logic/message/MessageFormatter';
 
@@ -21,15 +20,9 @@ const SimulatorStore = Reflux.createStore({
     };
 
     let promise = fetch('POST', url, simulation);
-    promise = promise.then(
-      response => {
-        return response.messages.map(MessageFormatter.formatMessageSummary);
-      },
-      error => {
-        UserNotification.error(`Simulating processing on message failed with status: ${error.message}`,
-          'Could not simulate processing on message');
-      }
-    );
+    promise = promise.then(response => {
+      return response.messages.map(MessageFormatter.formatMessageSummary);
+    });
 
     SimulatorActions.simulate.promise(promise);
   },
