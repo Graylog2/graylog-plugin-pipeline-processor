@@ -78,12 +78,12 @@ const SimulatorPage = React.createClass({
           </span>
 
           <span>
-            <LinkContainer to={'/system/pipelines/overview'}>
-              <Button bsStyle="info">Manage pipelines</Button>
+            <LinkContainer to={'/system/pipelines'}>
+              <Button bsStyle="info">Manage connections</Button>
             </LinkContainer>
             &nbsp;
-            <LinkContainer to={'/system/pipelines/rules'}>
-              <Button bsStyle="info">Manage rules</Button>
+            <LinkContainer to={'/system/pipelines/overview'}>
+              <Button bsStyle="info">Manage pipelines</Button>
             </LinkContainer>
           </span>
         </PageHeader>
