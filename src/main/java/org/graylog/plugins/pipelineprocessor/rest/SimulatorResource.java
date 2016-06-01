@@ -56,8 +56,10 @@ public class SimulatorResource extends RestResource implements PluginRestResourc
         try {
             final ResultMessage resultMessage = messages.get(request.messageId(), request.index());
             final Message message = resultMessage.getMessage();
-            final Stream stream = streamService.load(request.streamId());
-            message.addStream(stream);
+            if (!request.streamId().equals("default")) {
+                final Stream stream = streamService.load(request.streamId());
+                message.addStream(stream);
+            }
 
             List<ResultMessageSummary> simulationResults = new ArrayList<>();
 
