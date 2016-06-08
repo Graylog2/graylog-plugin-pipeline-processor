@@ -63,7 +63,7 @@ const SimulationPreview = React.createClass({
                          disableTestAgainstStream
                          disableSurroundingSearch
                          disableFieldActions
-                         isSimulation />
+                         disableMessageActions />
           );
         });
         simulationPreview = <div className="message-preview-wrapper">{messages}</div>;
