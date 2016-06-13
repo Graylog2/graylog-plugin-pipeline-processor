@@ -4,6 +4,8 @@ import { Alert, Col, Row } from 'react-bootstrap';
 import { Spinner } from 'components/common';
 import MessageShow from 'components/search/MessageShow';
 
+import SimulationPreview from './SimulationPreview';
+
 import NumberUtils from 'util/NumberUtils';
 
 const SimulationResults = React.createClass({
@@ -25,6 +27,14 @@ const SimulationResults = React.createClass({
 
   style: require('!style/useable!css!./SimulationResults.css'),
 
+  _getViewComponent(streams) {
+    if (this.props.isLoading) {
+      return <Spinner/>;
+    }
+
+    return <SimulationPreview simulationResults={this.props.simulationResults} streams={streams} />;
+  },
+
   render() {
     if (!this.props.originalMessage && !this.props.simulationResults) {
       return null;
@@ -42,34 +52,6 @@ const SimulationResults = React.createClass({
                      disableSurroundingSearch
                      disableFieldActions />
       );
-    }
-
-    let simulationPreview = (this.props.isLoading ? <Spinner /> : null);
-    if (this.props.simulationResults && Array.isArray(this.props.simulationResults.messages)) {
-      if (this.props.simulationResults.messages.length === 0) {
-        simulationPreview = (
-          <Alert bsStyle="info">
-            <p><strong>Message would be dropped</strong></p>
-            <p>
-              Processing the loaded message would drop it from the system. That means that the message <strong>would
-              not be stored</strong>, and would not be available on searches, alerts, or dashboards.
-            </p>
-          </Alert>
-        );
-      } else {
-        const messages = this.props.simulationResults.messages.map(message => {
-          return (
-            <MessageShow key={message.id}
-                         message={message}
-                         streams={streams}
-                         disableTestAgainstStream
-                         disableSurroundingSearch
-                         disableFieldActions
-                         disableMessageActions />
-          );
-        });
-        simulationPreview = <div className="message-preview-wrapper">{messages}</div>;
-      }
     }
 
     let errorMessage;
@@ -107,7 +89,7 @@ const SimulationResults = React.createClass({
               `These are the results of processing the loaded message. Processing took ${NumberUtils.formatNumber(this.props.simulationResults.took_microseconds)} µs.`}
           </p>
           {errorMessage}
-          {simulationPreview}
+          {this._getViewComponent(streams)}
         </Col>
       </Row>
     );
