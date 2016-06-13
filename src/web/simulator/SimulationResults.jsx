@@ -4,6 +4,8 @@ import { Alert, Col, Row } from 'react-bootstrap';
 import { Spinner } from 'components/common';
 import MessageShow from 'components/search/MessageShow';
 
+import NumberUtils from 'util/NumberUtils';
+
 const SimulationResults = React.createClass({
   propTypes: {
     stream: React.PropTypes.object.isRequired,
@@ -99,7 +101,11 @@ const SimulationResults = React.createClass({
         </Col>
         <Col md={6}>
           <h1>Simulation results</h1>
-          <p>This is the result of processing the loaded message:</p>
+          <p>
+            {this.props.isLoading ?
+              'Simulating message processing, please wait a moment.' :
+              `These are the results of processing the loaded message. Processing took ${NumberUtils.formatNumber(this.props.simulationResults.took_microseconds)} µs.`}
+          </p>
           {errorMessage}
           {simulationPreview}
         </Col>
