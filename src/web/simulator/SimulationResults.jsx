@@ -5,6 +5,7 @@ import { Spinner } from 'components/common';
 import MessageShow from 'components/search/MessageShow';
 
 import SimulationPreview from './SimulationPreview';
+import SimulationTrace from './SimulationTrace';
 
 import NumberUtils from 'util/NumberUtils';
 
@@ -52,7 +53,7 @@ const SimulationResults = React.createClass({
       case this.VIEW_OPTIONS.SIMULATION_PREVIEW:
         return <SimulationPreview simulationResults={this.props.simulationResults} streams={streams} />;
       case this.VIEW_OPTIONS.SIMULATION_TRACE:
-        return <div>Trace</div>;
+        return <SimulationTrace simulationResults={this.props.simulationResults} />;
       default:
       // it should never happen™
     }
