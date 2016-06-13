@@ -8,7 +8,7 @@ const SimulationResults = React.createClass({
   propTypes: {
     stream: React.PropTypes.object.isRequired,
     originalMessage: React.PropTypes.object,
-    simulationResults: React.PropTypes.array,
+    simulationResults: React.PropTypes.object,
     isLoading: React.PropTypes.bool,
     error: React.PropTypes.object,
   },
@@ -43,8 +43,8 @@ const SimulationResults = React.createClass({
     }
 
     let simulationPreview = (this.props.isLoading ? <Spinner /> : null);
-    if (this.props.simulationResults && Array.isArray(this.props.simulationResults)) {
-      if (this.props.simulationResults.length === 0) {
+    if (this.props.simulationResults && Array.isArray(this.props.simulationResults.messages)) {
+      if (this.props.simulationResults.messages.length === 0) {
         simulationPreview = (
           <Alert bsStyle="info">
             <p><strong>Message would be dropped</strong></p>
@@ -55,7 +55,7 @@ const SimulationResults = React.createClass({
           </Alert>
         );
       } else {
-        const messages = this.props.simulationResults.map(message => {
+        const messages = this.props.simulationResults.messages.map(message => {
           return (
             <MessageShow key={message.id}
                          message={message}

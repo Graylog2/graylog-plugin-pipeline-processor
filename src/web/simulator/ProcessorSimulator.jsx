@@ -25,8 +25,8 @@ const ProcessorSimulator = React.createClass({
     this.setState({ message: message, simulation: undefined, loading: true, error: undefined });
 
     SimulatorActions.simulate.triggerPromise(this.props.stream, message.index, message.id).then(
-      messages => {
-        this.setState({ simulation: messages, loading: false });
+      response => {
+        this.setState({ simulation: response, loading: false });
       },
       error => {
         this.setState({ loading: false, error: error });
