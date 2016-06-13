@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Col, Row } from 'react-bootstrap';
+import { Alert, Col, DropdownButton, MenuItem, Row } from 'react-bootstrap';
 
 import { Spinner } from 'components/common';
 import MessageShow from 'components/search/MessageShow';
@@ -17,6 +17,12 @@ const SimulationResults = React.createClass({
     error: React.PropTypes.object,
   },
 
+  getInitialState() {
+    return {
+      viewOption: this.VIEW_OPTIONS.SIMULATION_PREVIEW,
+    };
+  },
+
   componentDidMount() {
     this.style.use();
   },
@@ -25,14 +31,33 @@ const SimulationResults = React.createClass({
     this.style.unuse();
   },
 
+  VIEW_OPTIONS: {
+    SIMULATION_PREVIEW: 1,
+    SIMULATION_TRACE: 2,
+  },
+
   style: require('!style/useable!css!./SimulationResults.css'),
+
+  _changeViewOptions(_, eventKey) {
+    const selectedOption = Object.keys(this.VIEW_OPTIONS).find(key => this.VIEW_OPTIONS[key] === eventKey);
+    this.setState({ viewOption: this.VIEW_OPTIONS[selectedOption] });
+  },
 
   _getViewComponent(streams) {
     if (this.props.isLoading) {
       return <Spinner/>;
     }
 
-    return <SimulationPreview simulationResults={this.props.simulationResults} streams={streams} />;
+    switch (this.state.viewOption) {
+      case this.VIEW_OPTIONS.SIMULATION_PREVIEW:
+        return <SimulationPreview simulationResults={this.props.simulationResults} streams={streams} />;
+      case this.VIEW_OPTIONS.SIMULATION_TRACE:
+        return <div>Trace</div>;
+      default:
+      // it should never happen™
+    }
+
+    return null;
   },
 
   render() {
@@ -82,6 +107,19 @@ const SimulationResults = React.createClass({
           </div>
         </Col>
         <Col md={6}>
+          <div className="pull-right">
+            <DropdownButton id="simulation-view-options" title="View options" onSelect={this._changeViewOptions}
+                            bsStyle="default" bsSize="small" pullRight>
+              <MenuItem eventKey={this.VIEW_OPTIONS.SIMULATION_PREVIEW}
+                        active={this.state.viewOption === this.VIEW_OPTIONS.SIMULATION_PREVIEW}>
+                Simulation preview
+              </MenuItem>
+              <MenuItem eventKey={this.VIEW_OPTIONS.SIMULATION_TRACE}
+                        active={this.state.viewOption === this.VIEW_OPTIONS.SIMULATION_TRACE}>
+                Simulation trace
+              </MenuItem>
+            </DropdownButton>
+          </div>
           <h1>Simulation results</h1>
           <p>
             {this.props.isLoading ?
