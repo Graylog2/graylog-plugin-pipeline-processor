@@ -2,7 +2,7 @@ import React from 'react';
 import { Col, Row } from 'react-bootstrap';
 
 import LoaderTabs from 'components/messageloaders/LoaderTabs';
-import SimulationPreview from './SimulationPreview';
+import SimulationResults from './SimulationResults';
 
 import SimulatorActions from './SimulatorActions';
 import SimulatorStore from './SimulatorStore';
@@ -45,7 +45,7 @@ const ProcessorSimulator = React.createClass({
             <LoaderTabs onMessageLoaded={this._onMessageLoad} disableMessagePreview />
           </Col>
         </Row>
-        <SimulationPreview stream={this.props.stream}
+        <SimulationResults stream={this.props.stream}
                            originalMessage={this.state.message}
                            simulationResults={this.state.simulation}
                            isLoading={this.state.loading}

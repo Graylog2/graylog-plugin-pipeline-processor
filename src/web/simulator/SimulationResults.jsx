@@ -4,7 +4,7 @@ import { Alert, Col, Row } from 'react-bootstrap';
 import { Spinner } from 'components/common';
 import MessageShow from 'components/search/MessageShow';
 
-const SimulationPreview = React.createClass({
+const SimulationResults = React.createClass({
   propTypes: {
     stream: React.PropTypes.object.isRequired,
     originalMessage: React.PropTypes.object,
@@ -21,7 +21,7 @@ const SimulationPreview = React.createClass({
     this.style.unuse();
   },
 
-  style: require('!style/useable!css!./SimulationPreview.css'),
+  style: require('!style/useable!css!./SimulationResults.css'),
 
   render() {
     if (!this.props.originalMessage && !this.props.simulationResults) {
@@ -108,4 +108,4 @@ const SimulationPreview = React.createClass({
   },
 });
 
-export default SimulationPreview;
+export default SimulationResults;
