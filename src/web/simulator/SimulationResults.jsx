@@ -44,9 +44,26 @@ const SimulationResults = React.createClass({
     this.setState({ viewOption: this.VIEW_OPTIONS[selectedOption] });
   },
 
+  _getViewOptionsMenuItems() {
+    const viewOptionsMenuItems = [];
+
+    viewOptionsMenuItems.push(this._getViewOptionsMenuItem(this.VIEW_OPTIONS.SIMULATION_PREVIEW, 'Results preview'));
+    viewOptionsMenuItems.push(this._getViewOptionsMenuItem(this.VIEW_OPTIONS.SIMULATION_TRACE, 'Simulation trace'));
+
+    return viewOptionsMenuItems;
+  },
+
+  _getViewOptionsMenuItem(option, text) {
+    return (
+      <MenuItem key={option} eventKey={option} active={this.state.viewOption === option}>
+        {text}
+      </MenuItem>
+    );
+  },
+
   _getViewComponent(streams) {
     if (this.props.isLoading) {
-      return <Spinner/>;
+      return <Spinner />;
     }
 
     switch (this.state.viewOption) {
@@ -111,14 +128,7 @@ const SimulationResults = React.createClass({
           <div className="pull-right">
             <DropdownButton id="simulation-view-options" title="View options" onSelect={this._changeViewOptions}
                             bsStyle="default" bsSize="small" pullRight>
-              <MenuItem eventKey={this.VIEW_OPTIONS.SIMULATION_PREVIEW}
-                        active={this.state.viewOption === this.VIEW_OPTIONS.SIMULATION_PREVIEW}>
-                Simulation preview
-              </MenuItem>
-              <MenuItem eventKey={this.VIEW_OPTIONS.SIMULATION_TRACE}
-                        active={this.state.viewOption === this.VIEW_OPTIONS.SIMULATION_TRACE}>
-                Simulation trace
-              </MenuItem>
+              {this._getViewOptionsMenuItems()}
             </DropdownButton>
           </div>
           <h1>Simulation results</h1>
