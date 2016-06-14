@@ -4,6 +4,7 @@ import { Alert, Col, DropdownButton, MenuItem, Row } from 'react-bootstrap';
 import { Spinner } from 'components/common';
 import MessageShow from 'components/search/MessageShow';
 
+import SimulationChanges from './SimulationChanges';
 import SimulationPreview from './SimulationPreview';
 import SimulationTrace from './SimulationTrace';
 
@@ -34,7 +35,8 @@ const SimulationResults = React.createClass({
 
   VIEW_OPTIONS: {
     SIMULATION_PREVIEW: 1,
-    SIMULATION_TRACE: 2,
+    SIMULATION_SUMMARY: 2,
+    SIMULATION_TRACE: 3,
   },
 
   style: require('!style/useable!css!./SimulationResults.css'),
@@ -47,6 +49,7 @@ const SimulationResults = React.createClass({
   _getViewOptionsMenuItems() {
     const viewOptionsMenuItems = [];
 
+    viewOptionsMenuItems.push(this._getViewOptionsMenuItem(this.VIEW_OPTIONS.SIMULATION_SUMMARY, 'Changes summary'));
     viewOptionsMenuItems.push(this._getViewOptionsMenuItem(this.VIEW_OPTIONS.SIMULATION_PREVIEW, 'Results preview'));
     viewOptionsMenuItems.push(this._getViewOptionsMenuItem(this.VIEW_OPTIONS.SIMULATION_TRACE, 'Simulation trace'));
 
@@ -62,13 +65,15 @@ const SimulationResults = React.createClass({
   },
 
   _getViewComponent(streams) {
-    if (this.props.isLoading) {
+    if (this.props.isLoading || !this.props.simulationResults) {
       return <Spinner />;
     }
 
     switch (this.state.viewOption) {
       case this.VIEW_OPTIONS.SIMULATION_PREVIEW:
         return <SimulationPreview simulationResults={this.props.simulationResults} streams={streams} />;
+      case this.VIEW_OPTIONS.SIMULATION_SUMMARY:
+        return <SimulationChanges originalMessage={this.props.originalMessage} simulationResults={this.props.simulationResults} />;
       case this.VIEW_OPTIONS.SIMULATION_TRACE:
         return <SimulationTrace simulationResults={this.props.simulationResults} />;
       default:
