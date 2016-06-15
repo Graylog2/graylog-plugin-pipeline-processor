@@ -47,6 +47,6 @@ public class PipelineProcessorModule extends PluginModule {
 
         install(new ProcessorFunctionsModule());
 
-        installMessageDecorator(messageDecoratorBinder(), PipelineProcessorMessageDecorator.class);
+        installMessageDecorator(messageDecoratorBinder(), PipelineProcessorMessageDecorator.class, PipelineProcessorMessageDecorator.Factory.class);
     }
 }
