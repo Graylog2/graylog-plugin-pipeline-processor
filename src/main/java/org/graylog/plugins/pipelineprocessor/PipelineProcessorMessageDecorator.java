@@ -8,6 +8,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.graylog.plugins.pipelineprocessor.db.PipelineDao;
 import org.graylog.plugins.pipelineprocessor.db.PipelineService;
 import org.graylog.plugins.pipelineprocessor.processors.PipelineInterpreter;
+import org.graylog.plugins.pipelineprocessor.processors.listeners.NoopInterpreterListener;
 import org.graylog2.decorators.Decorator;
 import org.graylog2.indexer.results.ResultMessage;
 import org.graylog2.plugin.Message;
@@ -91,7 +92,10 @@ public class PipelineProcessorMessageDecorator implements MessageDecorator {
         resultMessages.stream()
                 .forEach((inMessage) -> {
                     final Message message = inMessage.getMessage();
-                    final List<Message> additionalCreatedMessages = pipelineInterpreter.processForPipelines(message, message.getId(), pipelines);
+                    final List<Message> additionalCreatedMessages = pipelineInterpreter.processForPipelines(message,
+                            message.getId(),
+                            pipelines,
+                            new NoopInterpreterListener());
                     final ResultMessage outMessage = ResultMessage.fromMessage(message, inMessage.getIndex(), inMessage.getHighlightRanges());
 
                     results.add(outMessage);

@@ -235,7 +235,7 @@ public class PipelineInterpreter implements MessageProcessor {
                     log.debug("[{}] running pipelines {} for streams {}", msgId, pipelinesToRun, streamsIds);
                 }
 
-                toProcess.addAll(processForPipelines(message, msgId, pipelinesToRun.stream().map(Pipeline::id).collect(Collectors.toSet())));
+                toProcess.addAll(processForPipelines(message, msgId, pipelinesToRun.stream().map(Pipeline::id).collect(Collectors.toSet()), interpreterListener));
 
                 boolean addedStreams = false;
                 // 5. add each message-stream combination to the blacklist set
