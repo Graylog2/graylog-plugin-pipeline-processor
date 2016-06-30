@@ -1,10 +1,11 @@
 import React from 'react';
 import { Col, Row } from 'react-bootstrap';
 
-import LoaderTabs from 'components/messageloaders/LoaderTabs';
+import RawMessageLoader from 'components/messageloaders/RawMessageLoader';
 import SimulationResults from './SimulationResults';
 
 import SimulatorActions from './SimulatorActions';
+// eslint-disable-next-line no-unused-vars
 import SimulatorStore from './SimulatorStore';
 
 const ProcessorSimulator = React.createClass({
@@ -21,17 +22,19 @@ const ProcessorSimulator = React.createClass({
     };
   },
 
-  _onMessageLoad(message) {
+  _onMessageLoad(message, params) {
     this.setState({ message: message, simulation: undefined, loading: true, error: undefined });
 
-    SimulatorActions.simulate.triggerPromise(this.props.stream, message.index, message.id).then(
-      response => {
-        this.setState({ simulation: response, loading: false });
-      },
-      error => {
-        this.setState({ loading: false, error: error });
-      }
-    );
+    SimulatorActions.simulate
+      .triggerPromise(this.props.stream, params.message, params.remoteAddress, params.codec, params.codecConfiguration)
+      .then(
+        response => {
+          this.setState({ simulation: response, loading: false });
+        },
+        error => {
+          this.setState({ loading: false, error: error });
+        }
+      );
   },
 
   render() {
@@ -42,7 +45,7 @@ const ProcessorSimulator = React.createClass({
             <h1>Load a message</h1>
             <p>Load a message to be used in the simulation. <strong>No changes will be done in your stored
               messages.</strong></p>
-            <LoaderTabs onMessageLoaded={this._onMessageLoad} disableMessagePreview />
+            <RawMessageLoader onMessageLoaded={this._onMessageLoad} />
           </Col>
         </Row>
         <SimulationResults stream={this.props.stream}

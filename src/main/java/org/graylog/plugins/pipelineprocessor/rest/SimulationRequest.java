@@ -21,6 +21,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 
+import javax.annotation.Nullable;
+import java.util.Map;
+
 @AutoValue
 @JsonAutoDetect
 public abstract class SimulationRequest {
@@ -28,10 +31,17 @@ public abstract class SimulationRequest {
     public abstract String streamId();
 
     @JsonProperty
-    public abstract String index();
+    public abstract String message();
 
     @JsonProperty
-    public abstract String messageId();
+    public abstract String remoteAddress();
+
+    @JsonProperty
+    public abstract String codec();
+
+    @JsonProperty
+    @Nullable
+    public abstract Map<String, Object> configuration();
 
     public static Builder builder() {
         return new AutoValue_SimulationRequest.Builder();
@@ -39,12 +49,16 @@ public abstract class SimulationRequest {
 
     @JsonCreator
     public static SimulationRequest create (@JsonProperty("stream_id") String streamId,
-                                            @JsonProperty("index") String index,
-                                            @JsonProperty("message_id")  String messageId) {
+                                            @JsonProperty("message") String message,
+                                            @JsonProperty("remote_address") String remoteAddress,
+                                            @JsonProperty("codec") String codec,
+                                            @JsonProperty("configuration") Map<String, Object> configuration) {
         return builder()
                 .streamId(streamId)
-                .index(index)
-                .messageId(messageId)
+                .message(message)
+                .remoteAddress(remoteAddress)
+                .codec(codec)
+                .configuration(configuration)
                 .build();
     }
 
@@ -54,8 +68,12 @@ public abstract class SimulationRequest {
 
         public abstract Builder streamId(String streamId);
 
-        public abstract Builder index(String index);
+        public abstract Builder message(String message);
 
-        public abstract Builder messageId(String messageId);
+        public abstract Builder remoteAddress(String remoteAddress);
+
+        public abstract Builder codec(String codec);
+
+        public abstract Builder configuration(Map<String, Object> configuration);
     }
 }
