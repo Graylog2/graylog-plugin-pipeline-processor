@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 @AutoValue
@@ -31,17 +30,7 @@ public abstract class SimulationRequest {
     public abstract String streamId();
 
     @JsonProperty
-    public abstract String message();
-
-    @JsonProperty
-    public abstract String remoteAddress();
-
-    @JsonProperty
-    public abstract String codec();
-
-    @JsonProperty
-    @Nullable
-    public abstract Map<String, Object> configuration();
+    public abstract Map<String, Object> message();
 
     public static Builder builder() {
         return new AutoValue_SimulationRequest.Builder();
@@ -49,16 +38,10 @@ public abstract class SimulationRequest {
 
     @JsonCreator
     public static SimulationRequest create (@JsonProperty("stream_id") String streamId,
-                                            @JsonProperty("message") String message,
-                                            @JsonProperty("remote_address") String remoteAddress,
-                                            @JsonProperty("codec") String codec,
-                                            @JsonProperty("configuration") Map<String, Object> configuration) {
+                                            @JsonProperty("message") Map<String, Object> message) {
         return builder()
                 .streamId(streamId)
                 .message(message)
-                .remoteAddress(remoteAddress)
-                .codec(codec)
-                .configuration(configuration)
                 .build();
     }
 
@@ -68,12 +51,6 @@ public abstract class SimulationRequest {
 
         public abstract Builder streamId(String streamId);
 
-        public abstract Builder message(String message);
-
-        public abstract Builder remoteAddress(String remoteAddress);
-
-        public abstract Builder codec(String codec);
-
-        public abstract Builder configuration(Map<String, Object> configuration);
+        public abstract Builder message(Map<String, Object> message);
     }
 }

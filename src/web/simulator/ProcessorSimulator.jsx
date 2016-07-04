@@ -22,11 +22,11 @@ const ProcessorSimulator = React.createClass({
     };
   },
 
-  _onMessageLoad(message, params) {
+  _onMessageLoad(message) {
     this.setState({ message: message, simulation: undefined, loading: true, error: undefined });
 
     SimulatorActions.simulate
-      .triggerPromise(this.props.stream, params.message, params.remoteAddress, params.codec, params.codecConfiguration)
+      .triggerPromise(this.props.stream, message.fields)
       .then(
         response => {
           this.setState({ simulation: response, loading: false });
@@ -43,8 +43,10 @@ const ProcessorSimulator = React.createClass({
         <Row>
           <Col md={12}>
             <h1>Load a message</h1>
-            <p>Load a message to be used in the simulation. <strong>No changes will be done in your stored
-              messages.</strong></p>
+            <p>
+              Load a message to be used in the simulation.{' '}
+              <strong>No changes will be done in your stored messages.</strong>
+            </p>
             <RawMessageLoader onMessageLoaded={this._onMessageLoad} />
           </Col>
         </Row>

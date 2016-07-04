@@ -24,13 +24,11 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.graylog.plugins.pipelineprocessor.processors.PipelineInterpreter;
 import org.graylog.plugins.pipelineprocessor.simulator.PipelineInterpreterTracer;
 import org.graylog2.database.NotFoundException;
-import org.graylog2.indexer.results.ResultMessage;
 import org.graylog2.messageprocessors.OrderedMessageProcessors;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.messageprocessors.MessageProcessor;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.graylog2.plugin.streams.Stream;
-import org.graylog2.rest.models.messages.requests.MessageParseRequest;
 import org.graylog2.rest.models.messages.responses.ResultMessageSummary;
 import org.graylog2.rest.resources.messages.MessageResource;
 import org.graylog2.shared.rest.resources.RestResource;
@@ -69,13 +67,8 @@ public class SimulatorResource extends RestResource implements PluginRestResourc
     @RequiresPermissions(PipelineRestPermissions.PIPELINE_RULE_READ)
     public SimulationResponse simulate(@ApiParam(name = "simulation", required = true) @NotNull SimulationRequest request) throws NotFoundException {
         checkPermission(RestPermissions.STREAMS_READ, request.streamId());
-        final ResultMessage resultMessage = messageResource.parse(MessageParseRequest.create(
-                request.message(),
-                request.codec(),
-                request.remoteAddress(),
-                request.configuration()));
 
-        final Message message = resultMessage.getMessage();
+        final Message message = new Message(request.message());
         if (!request.streamId().equals("default")) {
             final Stream stream = streamService.load(request.streamId());
             message.addStream(stream);
