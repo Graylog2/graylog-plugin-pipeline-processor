@@ -25,7 +25,7 @@ const SimulatorStore = Reflux.createStore({
     let promise = fetch('POST', url, simulation);
     promise = promise.then(response => {
       const formattedResponse = ObjectUtils.clone(response);
-      formattedResponse.messages = response.messages.map(message => MessageFormatter.formatMessageSummary(message));
+      formattedResponse.messages = response.messages.map(msg => MessageFormatter.formatMessageSummary(msg));
 
       return formattedResponse;
     });
