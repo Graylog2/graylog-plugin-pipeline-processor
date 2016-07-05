@@ -89,21 +89,20 @@ public class PipelineProcessorMessageDecorator implements MessageDecorator {
         if (pipelines.isEmpty()) {
             return resultMessages;
         }
-        resultMessages.stream()
-                .forEach((inMessage) -> {
-                    final Message message = inMessage.getMessage();
-                    final List<Message> additionalCreatedMessages = pipelineInterpreter.processForPipelines(message,
-                            message.getId(),
-                            pipelines,
-                            new NoopInterpreterListener());
-                    final ResultMessage outMessage = ResultMessage.fromMessage(message, inMessage.getIndex(), inMessage.getHighlightRanges());
+        resultMessages.forEach((inMessage) -> {
+            final Message message = inMessage.getMessage();
+            final List<Message> additionalCreatedMessages = pipelineInterpreter.processForPipelines(message,
+                    message.getId(),
+                    pipelines,
+                    new NoopInterpreterListener());
+            final ResultMessage outMessage = ResultMessage.createFromMessage(message, inMessage.getIndex(), inMessage.getHighlightRanges());
 
-                    results.add(outMessage);
-                    additionalCreatedMessages.stream().forEach((additionalMessage) -> {
-                        // TODO: pass proper highlight ranges. Need to rebuild them for new messages.
-                        results.add(ResultMessage.fromMessage(additionalMessage, "[created from decorator]", ImmutableMultimap.of()));
-                    });
-                });
+            results.add(outMessage);
+            additionalCreatedMessages.forEach((additionalMessage) -> {
+                // TODO: pass proper highlight ranges. Need to rebuild them for new messages.
+                results.add(ResultMessage.createFromMessage(additionalMessage, "[created from decorator]", ImmutableMultimap.of()));
+            });
+        });
 
         return results;
     }
