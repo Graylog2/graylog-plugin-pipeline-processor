@@ -31,14 +31,11 @@ import org.graylog2.plugin.configuration.ConfigurationRequest;
 import org.graylog2.plugin.configuration.fields.ConfigurationField;
 import org.graylog2.plugin.configuration.fields.DropdownField;
 import org.graylog2.plugin.decorators.SearchResponseDecorator;
-import org.graylog2.rest.models.messages.responses.DecorationStats;
 import org.graylog2.rest.models.messages.responses.ResultMessageSummary;
 import org.graylog2.rest.resources.search.responses.SearchResponse;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,7 +44,6 @@ public class PipelineProcessorMessageDecorator implements SearchResponseDecorato
     private static final String CONFIG_FIELD_PIPELINE = "pipeline";
 
     private final PipelineInterpreter pipelineInterpreter;
-    private final Decorator decorator;
     private final ImmutableSet<String> pipelines;
 
     public interface Factory extends SearchResponseDecorator.Factory {
@@ -95,7 +91,6 @@ public class PipelineProcessorMessageDecorator implements SearchResponseDecorato
     public PipelineProcessorMessageDecorator(PipelineInterpreter pipelineInterpreter,
                                              @Assisted Decorator decorator) {
         this.pipelineInterpreter = pipelineInterpreter;
-        this.decorator = decorator;
         final String pipelineId = (String)decorator.config().get(CONFIG_FIELD_PIPELINE);
         if (Strings.isNullOrEmpty(pipelineId)) {
             this.pipelines = ImmutableSet.of();
@@ -118,17 +113,13 @@ public class PipelineProcessorMessageDecorator implements SearchResponseDecorato
                     pipelines,
                     new NoopInterpreterListener());
 
-            final Map<String, DecorationStats> decorationStats = new HashMap<>(inMessage.decorationStats());
-            decorationStats.put(decorator.id(), DecorationStats.create(originalMessage, message.getFields()));
-
-            results.add(ResultMessageSummary.create(inMessage.highlightRanges(), message.getFields(), inMessage.index(), decorationStats));
+            results.add(ResultMessageSummary.create(inMessage.highlightRanges(), message.getFields(), inMessage.index()));
             additionalCreatedMessages.forEach((additionalMessage) -> {
                 // TODO: pass proper highlight ranges. Need to rebuild them for new messages.
                 results.add(ResultMessageSummary.create(
                         ImmutableMultimap.of(),
                         additionalMessage.getFields(),
-                        "[created from decorator]",
-                        ImmutableMap.of(decorator.id(), DecorationStats.create(Collections.emptyMap(), additionalMessage.getFields()))
+                        "[created from decorator]"
                 ));
             });
         });
