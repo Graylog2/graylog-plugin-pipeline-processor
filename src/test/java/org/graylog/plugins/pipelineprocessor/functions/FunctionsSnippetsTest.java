@@ -49,6 +49,7 @@ import org.graylog.plugins.pipelineprocessor.functions.messages.CreateMessage;
 import org.graylog.plugins.pipelineprocessor.functions.messages.DropMessage;
 import org.graylog.plugins.pipelineprocessor.functions.messages.HasField;
 import org.graylog.plugins.pipelineprocessor.functions.messages.RemoveField;
+import org.graylog.plugins.pipelineprocessor.functions.messages.RenameField;
 import org.graylog.plugins.pipelineprocessor.functions.messages.RouteToStream;
 import org.graylog.plugins.pipelineprocessor.functions.messages.SetField;
 import org.graylog.plugins.pipelineprocessor.functions.messages.SetFields;
@@ -113,6 +114,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         functions.put(HasField.NAME, new HasField());
         functions.put(SetField.NAME, new SetField());
         functions.put(SetFields.NAME, new SetFields());
+        functions.put(RenameField.NAME, new RenameField());
         functions.put(RemoveField.NAME, new RemoveField());
 
         functions.put(DropMessage.NAME, new DropMessage());
@@ -305,6 +307,8 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat(message).isNotNull();
         assertThat(message.getField("has_xyz")).isInstanceOf(Boolean.class);
         assertThat((boolean)message.getField("has_xyz")).isFalse();
+        assertThat(message.getField("string_literal")).isInstanceOf(String.class);
+        assertThat((String)message.getField("string_literal")).isEqualTo("abcd\\.e\tfg\u03a9\363");
     }
 
     @Test
@@ -440,5 +444,29 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat(message.getField("prio3_level")).isEqualTo("Emergency");
         assertThat(message.getField("prio4_facility")).isEqualTo("local4");
         assertThat(message.getField("prio4_level")).isEqualTo("Notice");
+    }
+
+    @Test
+    public void ipMatchingIssue28() {
+        final Rule rule = parser.parseRule(ruleForTest(), false);
+        final Message in = new Message("some message", "somehost.graylog.org", Tools.nowUTC());
+        evaluateRule(rule, in);
+
+        assertThat(actionsTriggered.get()).isFalse();
+    }
+
+    @Test
+    public void fieldRenaming() {
+        final Rule rule = parser.parseRule(ruleForTest(), false);
+
+        final Message in = new Message("some message", "somehost.graylog.org", Tools.nowUTC());
+        in.addField("field_a", "fieldAContent");
+        in.addField("field_b", "not deleted");
+
+        final Message message = evaluateRule(rule, in);
+
+        assertThat(message.hasField("field_1")).isFalse();
+        assertThat(message.hasField("field_2")).isTrue();
+        assertThat(message.hasField("field_b")).isTrue();
     }
 }
