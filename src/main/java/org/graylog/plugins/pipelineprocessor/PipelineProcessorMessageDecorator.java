@@ -106,7 +106,6 @@ public class PipelineProcessorMessageDecorator implements SearchResponseDecorato
             return searchResponse;
         }
         searchResponse.messages().forEach((inMessage) -> {
-            final Map<String, Object> originalMessage = ImmutableMap.copyOf(inMessage.message());
             final Message message = new Message(inMessage.message());
             final List<Message> additionalCreatedMessages = pipelineInterpreter.processForPipelines(message,
                     message.getId(),

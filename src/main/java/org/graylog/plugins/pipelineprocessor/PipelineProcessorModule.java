@@ -50,7 +50,6 @@ public class PipelineProcessorModule extends PluginModule {
         installSearchResponseDecorator(searchResponseDecoratorBinder(),
                 PipelineProcessorMessageDecorator.class,
                 PipelineProcessorMessageDecorator.Factory.class);
-
         installSearchResponseDecorator(searchResponseDecoratorBinder(),
                 UpperCaseDecorator.class,
                 UpperCaseDecorator.Factory.class);
