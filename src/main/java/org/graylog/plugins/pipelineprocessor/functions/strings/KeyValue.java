@@ -1,3 +1,19 @@
+/**
+ * This file is part of Graylog Pipeline Processor.
+ *
+ * Graylog Pipeline Processor is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Graylog Pipeline Processor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Graylog Pipeline Processor.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.graylog.plugins.pipelineprocessor.functions.strings;
 
 import com.google.common.base.CharMatcher;
@@ -33,8 +49,8 @@ public class KeyValue extends AbstractFunction<Map<String, String>> {
 
     public KeyValue() {
         valueParam = string("value").build();
-        splitParam = string("delimiter", CharMatcher.class).transform(CharMatcher::anyOf).optional().build();
-        valueSplitParam = string("kv_delimiter", CharMatcher.class).transform(CharMatcher::anyOf).optional().build();
+        splitParam = string("delimiters", CharMatcher.class).transform(CharMatcher::anyOf).optional().build();
+        valueSplitParam = string("kv_delimiters", CharMatcher.class).transform(CharMatcher::anyOf).optional().build();
 
         ignoreEmptyValuesParam = bool("ignore_empty_values").optional().build();
         allowDupeKeysParam = bool("allow_dup_keys").optional().build();
