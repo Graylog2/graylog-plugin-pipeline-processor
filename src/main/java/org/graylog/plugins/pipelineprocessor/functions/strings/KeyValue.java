@@ -68,7 +68,7 @@ public class KeyValue extends AbstractFunction<Map<String, String>> {
     @Override
     public Map<String, String> evaluate(FunctionArgs args, EvaluationContext context) {
         final String value = valueParam.required(args, context);
-        if (value == null) {
+        if (Strings.isNullOrEmpty(value)) {
             return null;
         }
         final CharMatcher kvPairsMatcher = splitParam.optional(args, context).orElse(CharMatcher.whitespace());
