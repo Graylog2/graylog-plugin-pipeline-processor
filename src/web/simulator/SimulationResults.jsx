@@ -98,7 +98,8 @@ const SimulationResults = React.createClass({
                      streams={streams}
                      disableTestAgainstStream
                      disableSurroundingSearch
-                     disableFieldActions />
+                     disableFieldActions
+                     disableMessageActions />
       );
     }
 
