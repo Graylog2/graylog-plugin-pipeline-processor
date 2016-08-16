@@ -16,24 +16,34 @@
  */
 package org.graylog.plugins.pipelineprocessor.ast.functions;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 @AutoValue
+@JsonAutoDetect
 public abstract class FunctionDescriptor<T> {
 
+    @JsonProperty
     public abstract String name();
 
+    @JsonProperty
     public abstract boolean pure();
 
+    @JsonProperty
     public abstract Class<? extends T> returnType();
 
+    @JsonProperty
     public abstract ImmutableList<ParameterDescriptor> params();
 
+    @JsonIgnore
     public abstract ImmutableMap<String, ParameterDescriptor> paramMap();
 
+    @JsonIgnore
     public ParameterDescriptor param(String name) {
         return paramMap().get(name);
     }
