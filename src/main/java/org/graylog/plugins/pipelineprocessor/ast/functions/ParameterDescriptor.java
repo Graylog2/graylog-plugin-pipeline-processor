@@ -45,6 +45,10 @@ public abstract class ParameterDescriptor<T, R> {
     @JsonIgnore
     public abstract java.util.function.Function<T, R> transform();
 
+    @JsonProperty
+    @Nullable
+    public abstract String description();
+
     public static <T,R> Builder<T, R> param() {
         return new AutoValue_ParameterDescriptor.Builder<T, R>().optional(false);
     }
@@ -124,6 +128,8 @@ public abstract class ParameterDescriptor<T, R> {
         public Builder<T, R> optional() {
             return optional(true);
         }
+
+        public abstract Builder<T, R> description(String description);
 
         abstract ParameterDescriptor<T, R> autoBuild();
         public ParameterDescriptor<T, R> build() {

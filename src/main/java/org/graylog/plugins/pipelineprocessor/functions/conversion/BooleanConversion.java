@@ -53,6 +53,7 @@ public class BooleanConversion extends AbstractFunction<Boolean> {
                 .name(NAME)
                 .returnType(Boolean.class)
                 .params(of(valueParam, defaultParam))
+                .description("Converts the value parameter to a boolean value using its string value.\n")
                 .build();
     }
 }

@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+import javax.annotation.Nullable;
+
 @AutoValue
 @JsonAutoDetect
 public abstract class FunctionDescriptor<T> {
@@ -48,6 +50,10 @@ public abstract class FunctionDescriptor<T> {
         return paramMap().get(name);
     }
 
+    @JsonProperty
+    @Nullable
+    public abstract String description();
+
     public static <T> Builder<T> builder() {
         //noinspection unchecked
         return new AutoValue_FunctionDescriptor.Builder().pure(false);
@@ -71,5 +77,6 @@ public abstract class FunctionDescriptor<T> {
         public abstract Builder<T> params(ImmutableList<ParameterDescriptor> params);
         public abstract Builder<T> paramMap(ImmutableMap<String, ParameterDescriptor> map);
         public abstract ImmutableList<ParameterDescriptor> params();
+        public abstract Builder<T> description(@Nullable String description);
     }
 }
