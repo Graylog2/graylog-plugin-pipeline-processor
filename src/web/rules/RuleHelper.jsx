@@ -59,8 +59,9 @@ end`,
     return descriptor.params.map(p => {
       return (
         <tr key={p.name}>
-          <td style={{ maxWidth: 150 }}>{p.name}</td>
-          <td>{this._niceType(p.type)}</td>
+          <td style={{ width: '1%' }}>{p.name}</td>
+          <td style={{ width: '1%' }}>{this._niceType(p.type)}</td>
+          <td style={{ width: '1%', textAlign: 'center' }}>{p.optional ? null : <i className="fa fa-check"/>}</td>
           <td>{p.description}</td>
         </tr>);
     });
@@ -78,6 +79,7 @@ end`,
                 <tr>
                   <th>Parameter</th>
                   <th>Type</th>
+                  <th>Required</th>
                   <th>Description</th>
                 </tr>
               </thead>
@@ -90,7 +92,7 @@ end`,
       }
       return (<tbody key={d.name} onClick={() => this._toggleFunctionDetail(d.name)} style={{ cursor: 'pointer' }}>
         <tr>
-          <td style={{ maxWidth: 250 }}>{this._functionSignature(d)}</td>
+          <td style={{ width: 300 }}>{this._functionSignature(d)}</td>
           <td>{d.description}</td>
         </tr>
         {details}
@@ -125,7 +127,7 @@ end`,
             <Tabs defaultActiveKey={1} animation={false}>
               <Tab eventKey={1} title="Functions">
                 <div className="table-responsive" style={{ marginTop: 10 }}>
-                  <PaginatedList totalItems={this.state.functionDescriptors.length} pageSize={this.state.pageSize} pageSizes={[10, 20, 50, 100]} onChange={this._onPageChange}>
+                  <PaginatedList totalItems={this.state.functionDescriptors.length} pageSize={this.state.pageSize} pageSizes={[10]} onChange={this._onPageChange}>
                     <Table condensed>
                       <thead>
                         <tr>
