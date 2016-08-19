@@ -41,6 +41,7 @@ import org.graylog.plugins.pipelineprocessor.parser.errors.IncompatibleIndexType
 import org.graylog.plugins.pipelineprocessor.parser.errors.InvalidFunctionArgument;
 import org.graylog.plugins.pipelineprocessor.parser.errors.NonIndexableType;
 import org.graylog.plugins.pipelineprocessor.parser.errors.OptionalParametersMustBeNamed;
+import org.graylog.plugins.pipelineprocessor.parser.errors.ParseError;
 import org.graylog.plugins.pipelineprocessor.parser.errors.UndeclaredFunction;
 import org.graylog.plugins.pipelineprocessor.parser.errors.UndeclaredVariable;
 import org.graylog2.plugin.Message;
@@ -498,7 +499,9 @@ public class PipelineRuleParserTest extends BaseParserTest {
             parser.parseRule(ruleForTest(), false);
         } catch (ParseException e) {
             assertEquals(1, e.getErrors().size());
-            assertEquals(InvalidFunctionArgument.class, Iterables.getOnlyElement(e.getErrors()).getClass());
+            final ParseError parseError = Iterables.getOnlyElement(e.getErrors());
+            assertEquals("foo", parseError.toString());
+            assertEquals(InvalidFunctionArgument.class, parseError.getClass());
         }
     }
 
