@@ -500,7 +500,7 @@ public class PipelineRuleParserTest extends BaseParserTest {
         } catch (ParseException e) {
             assertEquals(1, e.getErrors().size());
             final ParseError parseError = Iterables.getOnlyElement(e.getErrors());
-            assertEquals("foo", parseError.toString());
+            assertEquals("Unable to pre-compute value for 1st argument timezone in call to function now_in_tz: The datetime zone id '123' is not recognised", parseError.toString());
             assertEquals(InvalidFunctionArgument.class, parseError.getClass());
         }
     }
