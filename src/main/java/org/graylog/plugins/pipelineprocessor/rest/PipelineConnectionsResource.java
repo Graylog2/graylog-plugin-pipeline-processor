@@ -74,7 +74,7 @@ public class PipelineConnectionsResource extends RestResource implements PluginR
     @ApiOperation(value = "Connect processing pipelines to a stream", notes = "")
     @POST
     @RequiresPermissions(PipelineRestPermissions.PIPELINE_CONNECTION_EDIT)
-    @AuditEvent(type = PipelineProcessorAuditEventTypes.PIPELINE_CONNECTION_EDIT)
+    @AuditEvent(type = PipelineProcessorAuditEventTypes.PIPELINE_CONNECTION_UPDATE)
     public PipelineConnections connectPipelines(@ApiParam(name = "Json body", required = true) @NotNull PipelineConnections connection) throws NotFoundException {
         final String streamId = connection.streamId();
         // the default stream doesn't exist as an entity
