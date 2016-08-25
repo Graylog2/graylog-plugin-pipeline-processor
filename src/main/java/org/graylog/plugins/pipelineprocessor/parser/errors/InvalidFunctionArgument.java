@@ -1,4 +1,4 @@
-/*
+/**
  * This file is part of Graylog Pipeline Processor.
  *
  * Graylog Pipeline Processor is free software: you can redistribute it and/or modify
