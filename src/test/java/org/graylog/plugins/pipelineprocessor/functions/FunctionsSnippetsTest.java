@@ -565,9 +565,15 @@ public class FunctionsSnippetsTest extends BaseParserTest {
 
     @Test
     public void timezones() {
-        final Rule rule = parser.parseRule(ruleForTest(), true);
-        evaluateRule(rule);
+        final InstantMillisProvider clock = new InstantMillisProvider(GRAYLOG_EPOCH);
+        DateTimeUtils.setCurrentMillisProvider(clock);
+        try {
+            final Rule rule = parser.parseRule(ruleForTest(), true);
+            evaluateRule(rule);
 
-        assertThat(actionsTriggered.get()).isTrue();
+            assertThat(actionsTriggered.get()).isTrue();
+        } finally {
+            DateTimeUtils.setCurrentMillisSystem();
+        }
     }
 }
