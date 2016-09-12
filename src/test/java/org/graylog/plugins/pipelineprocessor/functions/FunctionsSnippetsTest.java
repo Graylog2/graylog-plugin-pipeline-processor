@@ -562,4 +562,12 @@ public class FunctionsSnippetsTest extends BaseParserTest {
 
         assertThat(context.hasEvaluationErrors()).isTrue();
     }
+
+    @Test
+    public void timezones() {
+        final Rule rule = parser.parseRule(ruleForTest(), true);
+        evaluateRule(rule);
+
+        assertThat(actionsTriggered.get()).isTrue();
+    }
 }
