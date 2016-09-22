@@ -24,24 +24,12 @@ public class AdditionExpression extends BinaryExpression implements NumericExpre
 
     @Override
     public long evaluateLong(EvaluationContext context) {
-        final Object value = firstNonNull(evaluateUnsafe(context), 0);
-
-        if (isIntegral()) {
-            return (Long) value;
-        } else {
-            return ((Double) value).longValue();
-        }
+        return (Long) firstNonNull(evaluateUnsafe(context), 0);
     }
 
     @Override
     public double evaluateDouble(EvaluationContext context) {
-        final Object value = firstNonNull(evaluateUnsafe(context), 0);
-
-        if (isIntegral()) {
-            return ((Long) value).doubleValue();
-        } else {
-            return (Double) value;
-        }
+        return (Double) firstNonNull(evaluateUnsafe(context), 0);
     }
 
     @Nullable
@@ -78,7 +66,7 @@ public class AdditionExpression extends BinaryExpression implements NumericExpre
         final NumericExpression left = (NumericExpression) this.left;
         final NumericExpression right = (NumericExpression) this.right;
 
-        // double + double = double, long + long = long, else double
+        // double + double = double, long + long = long, the other cases are caught by the type checker
         if (left.isIntegral()) {
             if (right.isIntegral()) {
                 type.set(Long.class);

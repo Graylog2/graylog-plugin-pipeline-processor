@@ -660,18 +660,18 @@ public class PipelineRuleParser {
         }
 
         @Override
-        public void exitEquality(RuleLangParser.EqualityContext ctx) {
-            final BinaryExpression binaryExpr = (BinaryExpression) parseContext.expressions().get(ctx);
-            final Class leftType = binaryExpr.left().getType();
-            final Class rightType = binaryExpr.right().getType();
+        public void exitAddition(RuleLangParser.AdditionContext ctx) {
+            checkBinaryExpression(ctx);
+        }
 
+        @Override
+        public void exitMultiplication(RuleLangParser.MultiplicationContext ctx) {
+            checkBinaryExpression(ctx);
+        }
+
+        @Override
+        public void exitEquality(RuleLangParser.EqualityContext ctx) {
             // TODO equality allows arbitrary types, in the future optimize by using specialized operators
-            // if we are comparing numbers, we are more picky to avoid having to do implicit type conversions at runtime
-            if (Number.class.isAssignableFrom(leftType) && Number.class.isAssignableFrom(rightType)) {
-                if (!leftType.equals(rightType)) {
-                    parseContext.addError(new IncompatibleTypes(ctx, binaryExpr));
-                }
-            }
         }
 
         private void checkBinaryExpression(RuleLangParser.ExpressionContext ctx) {
