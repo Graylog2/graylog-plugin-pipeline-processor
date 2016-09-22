@@ -21,7 +21,7 @@ const PipelinesOverviewPage = React.createClass({
           </span>
 
           <span>
-            <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES')}>
+            <LinkContainer to={Routes.pluginRoute('SYSTEM_CONNECTIONS')}>
               <Button bsStyle="info">Manage connections</Button>
             </LinkContainer>
             {' '}

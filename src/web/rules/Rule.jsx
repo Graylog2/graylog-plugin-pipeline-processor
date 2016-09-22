@@ -45,11 +45,11 @@ const Rule = React.createClass({
           </span>
 
           <span>
-            <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES')}>
+            <LinkContainer to={Routes.pluginRoute('SYSTEM_CONNECTIONS')}>
               <Button bsStyle="info">Manage connections</Button>
             </LinkContainer>
             &nbsp;
-            <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES_OVERVIEW')}>
+            <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES')}>
               <Button bsStyle="info">Manage pipelines</Button>
             </LinkContainer>
           </span>

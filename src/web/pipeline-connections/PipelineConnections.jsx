@@ -62,7 +62,7 @@ const PipelineConnections = React.createClass({
             <a>pipeline rules</a>
           </LinkContainer>{' '}
           and then putting them together in a{' '}
-          <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES_OVERVIEW')}>
+          <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES')}>
             <a>pipeline</a>
           </LinkContainer>!
         </span>

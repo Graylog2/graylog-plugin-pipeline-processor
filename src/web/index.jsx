@@ -12,8 +12,8 @@ import RuleDetailsPage from 'rules/RuleDetailsPage';
 
 PluginStore.register(new PluginManifest(packageJson, {
   routes: [
-    { path: '/system/pipelines', component: PipelineConnectionsPage },
-    { path: '/system/pipelines/overview', component: PipelinesOverviewPage },
+    { path: '/system/connections', component: PipelineConnectionsPage },
+    { path: '/system/pipelines', component: PipelinesOverviewPage },
     { path: '/system/pipelines/rules', component: RulesPage },
     { path: '/system/pipelines/rules/:ruleId', component: RuleDetailsPage },
     { path: '/system/pipelines/simulate/:streamId', component: SimulatorPage },

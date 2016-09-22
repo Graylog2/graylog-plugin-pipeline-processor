@@ -133,7 +133,7 @@ const ConnectionForm = React.createClass({
     const pipelineHelp = (
       <span>
         Select the pipelines to connect to this stream, or create one in the{' '}
-        <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES_OVERVIEW')}><a>Pipelines Overview page</a></LinkContainer>.
+        <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES')}><a>Pipelines Overview page</a></LinkContainer>.
       </span>
     );
 
