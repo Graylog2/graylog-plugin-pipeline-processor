@@ -9,15 +9,30 @@ import { MetricContainer, CounterRate } from 'components/metrics';
 
 import PipelinesActions from 'pipelines/PipelinesActions';
 import PipelinesStore from 'pipelines/PipelinesStore';
+import PipelineConnectionsActions from 'pipeline-connections/PipelineConnectionsActions';
+import PipelineConnectionsStore from 'pipeline-connections/PipelineConnectionsStore';
+
+import StoreProvider from 'injection/StoreProvider';
+const StreamsStore = StoreProvider.getStore('Streams');
 
 import Routes from 'routing/Routes';
 
 const ProcessingTimelineComponent = React.createClass({
-  mixins: [Reflux.connect(PipelinesStore)],
+  mixins: [Reflux.connect(PipelinesStore), Reflux.connect(PipelineConnectionsStore)],
 
   componentDidMount() {
     this.style.use();
     PipelinesActions.list();
+    PipelineConnectionsActions.list();
+
+    StreamsStore.listStreams().then((streams) => {
+      streams.push({
+        id: 'default',
+        title: 'Default',
+        description: 'Stream used by default for messages not matching another stream.',
+      });
+      this.setState({ streams });
+    });
   },
 
   componentWillUnmount() {
@@ -43,6 +58,17 @@ const ProcessingTimelineComponent = React.createClass({
     }
 
     return <th className={className}>{header}</th>;
+  },
+
+  _formatStreamsUsingPipeline(pipeline) {
+    const streamsUsingPipeline = this.state.connections
+      .filter(c => c.pipeline_ids && c.pipeline_ids.includes(pipeline.id)) // Get connections for this pipeline
+      .filter(c => this.state.streams.some(s => s.id === c.stream_id)) // Filter out deleted streams
+      .map(c => this.state.streams.find(s => s.id === c.stream_id))
+      .sort((s1, s2) => naturalSort(s1.title, s2.title));
+
+    return (streamsUsingPipeline.length === 0 ?
+      <em>Not connected</em> : streamsUsingPipeline.map(s => s.title).join(', '));
   },
 
   _formatStages(pipeline, stages) {
@@ -75,6 +101,7 @@ const ProcessingTimelineComponent = React.createClass({
             <CounterRate prefix="Throughput:" suffix="msg/s" />
           </MetricContainer>
         </td>
+        <td className="stream-list">{this._formatStreamsUsingPipeline(pipeline)}</td>
         <td>{this._formatStages(pipeline, pipeline.stages)}</td>
         <td>
           <Button bsStyle="primary" bsSize="xsmall" onClick={this._deletePipeline(pipeline)}>Delete</Button>
@@ -95,8 +122,12 @@ const ProcessingTimelineComponent = React.createClass({
     };
   },
 
+  _isLoading() {
+    return !this.state.pipelines || !this.state.streams || !this.state.connections;
+  },
+
   render() {
-    if (!this.state.pipelines) {
+    if (this._isLoading()) {
       return <Spinner />;
     }
 
@@ -121,7 +152,7 @@ const ProcessingTimelineComponent = React.createClass({
 
     this.usedStages = this._calculateUsedStages(this.state.pipelines);
 
-    const headers = ['Pipeline', 'Processing Timeline', 'Actions'];
+    const headers = ['Pipeline', 'Connected to Streams', 'Processing Timeline', 'Actions'];
     return (
       <div>
         {addNewPipelineButton}

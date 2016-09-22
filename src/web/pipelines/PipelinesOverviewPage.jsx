@@ -3,9 +3,11 @@ import { Row, Col, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
 import { PageHeader } from 'components/common';
+import DocumentationLink from 'components/support/DocumentationLink';
 import ProcessingTimelineComponent from './ProcessingTimelineComponent';
 
 import Routes from 'routing/Routes';
+import DocsHelper from 'util/DocsHelper';
 
 const PipelinesOverviewPage = React.createClass({
   render() {
@@ -17,14 +19,10 @@ const PipelinesOverviewPage = React.createClass({
             rules are evaluated and applied. Messages can go through one or more stages.
           </span>
           <span>
-            Click on a pipeline name to view more about it and edit its stages.
+            Read more about Graylog pipelines in the <DocumentationLink page={DocsHelper.PAGES.PIPELINES} text="documentation" />.
           </span>
 
           <span>
-            <LinkContainer to={Routes.pluginRoute('SYSTEM_CONNECTIONS')}>
-              <Button bsStyle="info">Manage connections</Button>
-            </LinkContainer>
-            {' '}
             <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES_RULES')}>
               <Button bsStyle="info">Manage rules</Button>
             </LinkContainer>
