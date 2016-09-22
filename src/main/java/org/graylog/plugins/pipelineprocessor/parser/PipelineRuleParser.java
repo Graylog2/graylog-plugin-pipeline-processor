@@ -37,6 +37,7 @@ import org.graylog.plugins.pipelineprocessor.ast.Pipeline;
 import org.graylog.plugins.pipelineprocessor.ast.Rule;
 import org.graylog.plugins.pipelineprocessor.ast.Stage;
 import org.graylog.plugins.pipelineprocessor.ast.exceptions.PrecomputeFailure;
+import org.graylog.plugins.pipelineprocessor.ast.expressions.AdditionExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.AndExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.ArrayLiteralExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.BinaryExpression;
@@ -532,6 +533,22 @@ public class PipelineRuleParser {
         }
 
         @Override
+        public void exitAddition(RuleLangParser.AdditionContext ctx) {
+            final Expression left = exprs.get(ctx.left);
+            final Expression right = exprs.get(ctx.right);
+            final boolean isPlus = ctx.add.getText().equals("+");
+
+            final AdditionExpression expr = new AdditionExpression(ctx.getStart(), left, right, isPlus);
+            log.trace("ADD: ctx {} => {}", ctx, expr);
+            exprs.put(ctx, expr);
+        }
+
+        @Override
+        public void exitMultiplication(RuleLangParser.MultiplicationContext ctx) {
+            super.exitMultiplication(ctx);
+        }
+
+        @Override
         public void enterMessageRef(RuleLangParser.MessageRefContext ctx) {
             // nested field access is ok, these are not rule variables
             isIdIsFieldAccess.push(true);
@@ -644,8 +661,17 @@ public class PipelineRuleParser {
 
         @Override
         public void exitEquality(RuleLangParser.EqualityContext ctx) {
+            final BinaryExpression binaryExpr = (BinaryExpression) parseContext.expressions().get(ctx);
+            final Class leftType = binaryExpr.left().getType();
+            final Class rightType = binaryExpr.right().getType();
+
             // TODO equality allows arbitrary types, in the future optimize by using specialized operators
-//            checkBinaryExpression(ctx, true);
+            // if we are comparing numbers, we are more picky to avoid having to do implicit type conversions at runtime
+            if (Number.class.isAssignableFrom(leftType) && Number.class.isAssignableFrom(rightType)) {
+                if (!leftType.equals(rightType)) {
+                    parseContext.addError(new IncompatibleTypes(ctx, binaryExpr));
+                }
+            }
         }
 
         private void checkBinaryExpression(RuleLangParser.ExpressionContext ctx) {
