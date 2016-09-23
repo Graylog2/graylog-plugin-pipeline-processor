@@ -6,6 +6,7 @@ import naturalSort from 'javascript-natural-sort';
 
 import { DataTable, Spinner } from 'components/common';
 import { MetricContainer, CounterRate } from 'components/metrics';
+import PipelineConnectionsList from './PipelineConnectionsList';
 
 import PipelinesActions from 'pipelines/PipelinesActions';
 import PipelinesStore from 'pipelines/PipelinesStore';
@@ -60,15 +61,8 @@ const ProcessingTimelineComponent = React.createClass({
     return <th className={className}>{header}</th>;
   },
 
-  _formatStreamsUsingPipeline(pipeline) {
-    const streamsUsingPipeline = this.state.connections
-      .filter(c => c.pipeline_ids && c.pipeline_ids.includes(pipeline.id)) // Get connections for this pipeline
-      .filter(c => this.state.streams.some(s => s.id === c.stream_id)) // Filter out deleted streams
-      .map(c => this.state.streams.find(s => s.id === c.stream_id))
-      .sort((s1, s2) => naturalSort(s1.title, s2.title));
-
-    return (streamsUsingPipeline.length === 0 ?
-      <em>Not connected</em> : streamsUsingPipeline.map(s => s.title).join(', '));
+  _formatConnectedStreams(streams) {
+    return streams.map(s => s.title).join(', ');
   },
 
   _formatStages(pipeline, stages) {
@@ -101,7 +95,11 @@ const ProcessingTimelineComponent = React.createClass({
             <CounterRate prefix="Throughput:" suffix="msg/s" />
           </MetricContainer>
         </td>
-        <td className="stream-list">{this._formatStreamsUsingPipeline(pipeline)}</td>
+        <td className="stream-list">
+          <PipelineConnectionsList pipeline={pipeline} connections={this.state.connections} streams={this.state.streams}
+                                   streamsFormatter={this._formatConnectedStreams}
+                                   noConnectionsMessage={<em>Not connected</em>} />
+        </td>
         <td>{this._formatStages(pipeline, pipeline.stages)}</td>
         <td>
           <Button bsStyle="primary" bsSize="xsmall" onClick={this._deletePipeline(pipeline)}>Delete</Button>
