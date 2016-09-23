@@ -1,0 +1,10 @@
+rule "arithmetic operators"
+when
+    1.0 + 1.0 == 2.0 &&
+    8 * 2 > 15 &&
+    10 / 20 == 0 &&
+    21 % 20 == 1 &&
+    10.0 / 20.0 == 0.5
+then
+    trigger_test();
+end

@@ -507,7 +507,7 @@ public class PipelineRuleParserTest extends BaseParserTest {
     }
 
     @Test
-    public void addition() {
+    public void arithmetic() {
         final Rule rule = parser.parseRule(ruleForTest(), false);
         evaluateRule(rule);
 

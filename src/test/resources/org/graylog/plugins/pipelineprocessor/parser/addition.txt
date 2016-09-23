@@ -1,5 +1,0 @@
-rule "addition"
-when 1.0 + 1.0 == 2.0
-then
-    trigger_test();
-end

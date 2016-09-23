@@ -55,6 +55,7 @@ import org.graylog.plugins.pipelineprocessor.ast.expressions.LogicalExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.LongExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.MapLiteralExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.MessageRefExpression;
+import org.graylog.plugins.pipelineprocessor.ast.expressions.MultiplicationExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.NotExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.OrExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.StringExpression;
@@ -545,7 +546,13 @@ public class PipelineRuleParser {
 
         @Override
         public void exitMultiplication(RuleLangParser.MultiplicationContext ctx) {
-            super.exitMultiplication(ctx);
+            final Expression left = exprs.get(ctx.left);
+            final Expression right = exprs.get(ctx.right);
+            final char operator = ctx.mult.getText().charAt(0);
+
+            final MultiplicationExpression expr = new MultiplicationExpression(ctx.getStart(), left, right, operator);
+            log.trace("MULT: ctx {} => {}", ctx, expr);
+            exprs.put(ctx, expr);
         }
 
         @Override

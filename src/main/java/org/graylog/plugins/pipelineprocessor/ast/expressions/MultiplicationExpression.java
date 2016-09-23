@@ -24,13 +24,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 
-public class AdditionExpression extends BinaryExpression implements NumericExpression {
-    private final boolean isPlus;
+public class MultiplicationExpression extends BinaryExpression implements NumericExpression  {
+    private final char operator;
     private AtomicReference<Class> type = new AtomicReference<>();
 
-    public AdditionExpression(Token start, Expression left, Expression right, boolean isPlus) {
+    public MultiplicationExpression(Token start, Expression left, Expression right, char operator) {
         super(start, left, right);
-        this.isPlus = isPlus;
+        this.operator = operator;
     }
 
     @Override
@@ -57,18 +57,30 @@ public class AdditionExpression extends BinaryExpression implements NumericExpre
         if (isIntegral()) {
             final long l = left.evaluateLong(context);
             final long r = right.evaluateLong(context);
-            if (isPlus) {
-                return l + r;
-            } else {
-                return l - r;
+
+            switch (operator) {
+                case '*':
+                    return l * r;
+                case '/':
+                    return l / r;
+                case '%':
+                    return l % r;
+                default:
+                    throw new IllegalStateException("Invalid operator, this is a bug.");
             }
         } else {
             final double l = left.evaluateDouble(context);
             final double r = right.evaluateDouble(context);
-            if (isPlus) {
-                return l + r;
-            } else {
-                return l - r;
+
+            switch (operator) {
+                case '*':
+                    return l * r;
+                case '/':
+                    return l / r;
+                case '%':
+                    return l % r;
+                default:
+                    throw new IllegalStateException("Invalid operator, this is a bug.");
             }
         }
     }
@@ -96,8 +108,10 @@ public class AdditionExpression extends BinaryExpression implements NumericExpre
         return type.get();
     }
 
+
     @Override
     public String toString() {
-        return left.toString() + (isPlus ? " + " : " - ") + right.toString();
+        return left.toString() + " " + operator + " " + right.toString();
     }
+
 }
