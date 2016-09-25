@@ -58,6 +58,7 @@ import org.graylog.plugins.pipelineprocessor.ast.expressions.MessageRefExpressio
 import org.graylog.plugins.pipelineprocessor.ast.expressions.MultiplicationExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.NotExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.OrExpression;
+import org.graylog.plugins.pipelineprocessor.ast.expressions.SignedExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.StringExpression;
 import org.graylog.plugins.pipelineprocessor.ast.expressions.VarRefExpression;
 import org.graylog.plugins.pipelineprocessor.ast.functions.Function;
@@ -531,6 +532,16 @@ public class PipelineRuleParser {
             // nothing to do, just propagate
             exprs.put(ctx, exprs.get(ctx.expression()));
             parseContext.addInnerNode(ctx);
+        }
+
+        @Override
+        public void exitSignedExpression(RuleLangParser.SignedExpressionContext ctx) {
+            final Expression right = exprs.get(ctx.expr);
+            final boolean isPlus = ctx.sign.getText().equals("+");
+
+            final SignedExpression expr = new SignedExpression(ctx.getStart(), right, isPlus);
+            log.trace("SIGN: ctx {} => {}", ctx, expr);
+            exprs.put(ctx, expr);
         }
 
         @Override

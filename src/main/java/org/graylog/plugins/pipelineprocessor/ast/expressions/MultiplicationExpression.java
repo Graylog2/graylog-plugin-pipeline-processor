@@ -51,13 +51,12 @@ public class MultiplicationExpression extends BinaryExpression implements Numeri
     @Nullable
     @Override
     public Object evaluateUnsafe(EvaluationContext context) {
-        final NumericExpression left = (NumericExpression) this.left;
-        final NumericExpression right = (NumericExpression) this.right;
+        final Object leftValue = left.evaluateUnsafe(context);
+        final Object rightValue = right.evaluateUnsafe(context);
 
         if (isIntegral()) {
-            final long l = left.evaluateLong(context);
-            final long r = right.evaluateLong(context);
-
+            long l = (long) leftValue;
+            long r = (long) rightValue;
             switch (operator) {
                 case '*':
                     return l * r;
@@ -69,8 +68,8 @@ public class MultiplicationExpression extends BinaryExpression implements Numeri
                     throw new IllegalStateException("Invalid operator, this is a bug.");
             }
         } else {
-            final double l = left.evaluateDouble(context);
-            final double r = right.evaluateDouble(context);
+            final double l = (double) leftValue;
+            final double r = (double) rightValue;
 
             switch (operator) {
                 case '*':
@@ -91,21 +90,21 @@ public class MultiplicationExpression extends BinaryExpression implements Numeri
         if (theType != null) {
             return theType;
         }
-        final NumericExpression left = (NumericExpression) this.left;
-        final NumericExpression right = (NumericExpression) this.right;
 
-        // double + double = double, long + long = long, the other cases are caught by the type checker
-        if (left.isIntegral()) {
-            if (right.isIntegral()) {
-                type.set(Long.class);
-            } else {
-                type.set(Double.class);
-            }
+        final Class leftType = left.getType();
+        final Class rightType = right.getType();
+        if (leftType.equals(rightType) && Number.class.isAssignableFrom(leftType)) {
+            // ok to proceed
+            type.set(leftType);
+            return leftType;
         } else {
-            type.set(Double.class);
+            // types must be at least equal and numeric, this is a type checker bug
+            if (left instanceof Number) {
+                throw new IllegalArgumentException("Cannot multiply values of different types: " + leftType.getSimpleName() + " and " + rightType.getSimpleName());
+            } else {
+                throw new IllegalArgumentException("Cannot multiply non-numeric types: " + leftType.getSimpleName() + " and " + rightType.getSimpleName());
+            }
         }
-
-        return type.get();
     }
 
 
