@@ -5,14 +5,12 @@ import packageJson from '../../package.json';
 import { PluginManifest, PluginStore } from 'graylog-web-plugin/plugin';
 import PipelinesOverviewPage from 'pipelines/PipelinesOverviewPage';
 import PipelineDetailsPage from 'pipelines/PipelineDetailsPage';
-import PipelineConnectionsPage from 'pipeline-connections/PipelineConnectionsPage';
 import SimulatorPage from 'simulator/SimulatorPage';
 import RulesPage from 'rules/RulesPage';
 import RuleDetailsPage from 'rules/RuleDetailsPage';
 
 PluginStore.register(new PluginManifest(packageJson, {
   routes: [
-    { path: '/system/connections', component: PipelineConnectionsPage },
     { path: '/system/pipelines', component: PipelinesOverviewPage },
     { path: '/system/pipelines/rules', component: RulesPage },
     { path: '/system/pipelines/rules/:ruleId', component: RuleDetailsPage },

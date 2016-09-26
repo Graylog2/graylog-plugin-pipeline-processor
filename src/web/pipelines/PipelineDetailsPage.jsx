@@ -12,8 +12,8 @@ import ObjectUtils from 'util/ObjectUtils';
 import PipelinesActions from 'pipelines/PipelinesActions';
 import PipelinesStore from 'pipelines/PipelinesStore';
 import RulesStore from 'rules/RulesStore';
-import PipelineConnectionsActions from 'pipeline-connections/PipelineConnectionsActions';
-import PipelineConnectionsStore from 'pipeline-connections/PipelineConnectionsStore';
+import PipelineConnectionsActions from './PipelineConnectionsActions';
+import PipelineConnectionsStore from './PipelineConnectionsStore';
 
 import StoreProvider from 'injection/StoreProvider';
 const StreamsStore = StoreProvider.getStore('Streams');

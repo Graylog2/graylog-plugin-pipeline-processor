@@ -9,8 +9,8 @@ import ProcessorSimulator from './ProcessorSimulator';
 
 import PipelinesActions from 'pipelines/PipelinesActions';
 import PipelinesStore from 'pipelines/PipelinesStore';
-import PipelineConnectionsActions from 'pipeline-connections/PipelineConnectionsActions';
-import PipelineConnectionsStore from 'pipeline-connections/PipelineConnectionsStore';
+import PipelineConnectionsActions from 'pipelines/PipelineConnectionsActions';
+import PipelineConnectionsStore from 'pipelines/PipelineConnectionsStore';
 
 import StoreProvider from 'injection/StoreProvider';
 const StreamsStore = StoreProvider.getStore('Streams');

@@ -10,8 +10,8 @@ import PipelineConnectionsList from './PipelineConnectionsList';
 
 import PipelinesActions from 'pipelines/PipelinesActions';
 import PipelinesStore from 'pipelines/PipelinesStore';
-import PipelineConnectionsActions from 'pipeline-connections/PipelineConnectionsActions';
-import PipelineConnectionsStore from 'pipeline-connections/PipelineConnectionsStore';
+import PipelineConnectionsActions from './PipelineConnectionsActions';
+import PipelineConnectionsStore from './PipelineConnectionsStore';
 
 import StoreProvider from 'injection/StoreProvider';
 const StreamsStore = StoreProvider.getStore('Streams');
