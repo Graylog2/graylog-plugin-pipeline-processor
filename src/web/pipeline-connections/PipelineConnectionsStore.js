@@ -30,12 +30,12 @@ const PipelineConnectionsStore = Reflux.createStore({
     }, failCallback);
   },
 
-  update(connection) {
+  connectToStream(connection) {
     const failCallback = (error) => {
       UserNotification.error('Updating pipeline connections failed with status: ' + error.message,
         'Could not update pipeline connections');
     };
-    const url = URLUtils.qualifyUrl(urlPrefix + '/system/pipelines/connections');
+    const url = URLUtils.qualifyUrl(urlPrefix + '/system/pipelines/connections/to_stream');
     const updatedConnection = {
       stream_id: connection.stream,
       pipeline_ids: connection.pipelines,

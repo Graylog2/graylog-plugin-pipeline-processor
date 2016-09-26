@@ -42,7 +42,7 @@ const PipelineConnectionsPage = React.createClass({
   },
 
   _updateConnections(connections, callback) {
-    PipelineConnectionsActions.update(connections);
+    PipelineConnectionsActions.connectToStream(connections);
     callback();
   },
 
