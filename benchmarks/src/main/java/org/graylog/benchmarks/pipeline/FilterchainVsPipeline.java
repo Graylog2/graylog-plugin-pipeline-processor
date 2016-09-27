@@ -84,7 +84,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 @SuppressWarnings("Duplicates")
-public class PipelineBenchmark {
+public class FilterchainVsPipeline {
 
     @State(Scope.Benchmark)
     public static class InterpreterState {
@@ -196,6 +196,7 @@ public class PipelineBenchmark {
                         mock(NotificationService.class),
                         streamService
                 );
+                final EventBus eventBus = new EventBus();
                 ExecutorService daemonExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(
                         true).build());
                 when(engineFactory.create(any(), any())).thenReturn(
@@ -207,6 +208,7 @@ public class PipelineBenchmark {
                 final StreamRouter streamRouter = new StreamRouter(streamService,
                                                                    serverStatus,
                                                                    engineFactory,
+                                                                   eventBus,
                                                                    scheduler);
 
                 // drools
@@ -214,11 +216,11 @@ public class PipelineBenchmark {
                 final FilterService filterService = mock(FilterService.class);
                 when(filterService.loadAll()).thenReturn(Collections.emptySet());
 
-                filters.add(new ExtractorFilter(inputService));
-                filters.add(new StaticFieldFilter(inputService));
+                filters.add(new ExtractorFilter(inputService, eventBus, scheduler));
+                filters.add(new StaticFieldFilter(inputService, eventBus, scheduler));
                 filters.add(new StreamMatcherFilter(streamRouter));
                 if (!noDrools) {
-                    filters.add(new RulesFilter(droolsEngine, filterService));
+                    filters.add(new RulesFilter(droolsEngine, filterService, eventBus, scheduler));
                 }
 
                 filterChain = new MessageFilterChainProcessor(metricRegistry,
@@ -243,7 +245,7 @@ public class PipelineBenchmark {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(PipelineBenchmark.class.getSimpleName())
+                .include(FilterchainVsPipeline.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(5)
                 .threads(1)

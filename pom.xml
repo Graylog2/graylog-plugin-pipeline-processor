@@ -502,5 +502,11 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>benchmark</id>
+            <modules>
+                <module>benchmarks</module>
+            </modules>
+        </profile>
     </profiles>
 </project>
