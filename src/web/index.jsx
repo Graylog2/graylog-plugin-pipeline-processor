@@ -14,7 +14,7 @@ PluginStore.register(new PluginManifest(packageJson, {
     { path: '/system/pipelines', component: PipelinesOverviewPage },
     { path: '/system/pipelines/rules', component: RulesPage },
     { path: '/system/pipelines/rules/:ruleId', component: RuleDetailsPage },
-    { path: '/system/pipelines/simulate/:streamId', component: SimulatorPage },
+    { path: '/system/pipelines/simulate', component: SimulatorPage },
     { path: '/system/pipelines/:pipelineId', component: PipelineDetailsPage },
   ],
 

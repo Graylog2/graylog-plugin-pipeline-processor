@@ -1,5 +1,6 @@
 import React from 'react';
-import { Row, Col } from 'react-bootstrap';
+import { Button, Row, Col } from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
 
 import { EntityList, Pluralize } from 'components/common';
 import Stage from './Stage';
@@ -7,6 +8,8 @@ import StageForm from './StageForm';
 import PipelineDetails from './PipelineDetails';
 import PipelineConnectionsForm from './PipelineConnectionsForm';
 import PipelineConnectionsList from './PipelineConnectionsList';
+
+import Routes from 'routing/Routes';
 
 const Pipeline = React.createClass({
   propTypes: {
@@ -80,10 +83,14 @@ const Pipeline = React.createClass({
 
     return (
       <div>
-        <PipelineDetails pipeline={this.props.pipeline} onChange={this.props.onPipelineChange} />
+        <PipelineDetails pipeline={pipeline} onChange={this.props.onPipelineChange} />
         <Row className="row-sm row-margin-top">
           <Col md={12}>
             <div className="pull-right">
+              <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES_SIMULATE')}>
+                <Button bsStyle="info">Simulate processing</Button>
+              </LinkContainer>
+              &nbsp;
               <PipelineConnectionsForm pipeline={pipeline} connections={this.props.connections}
                                        streams={this.props.streams} save={this.props.onConnectionsChange} />
             </div>
