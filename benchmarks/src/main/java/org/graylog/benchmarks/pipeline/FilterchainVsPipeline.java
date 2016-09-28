@@ -24,6 +24,9 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.graylog.plugins.pipelineprocessor.ast.functions.Function;
+import org.graylog.plugins.pipelineprocessor.db.mongodb.MongoDbPipelineStreamConnectionsService;
+import org.graylog.plugins.pipelineprocessor.db.mongodb.MongoDbRuleService;
+import org.graylog.plugins.pipelineprocessor.db.mongodb.MongoDbPipelineService;
 import org.graylog.plugins.pipelineprocessor.db.PipelineDao;
 import org.graylog.plugins.pipelineprocessor.db.PipelineService;
 import org.graylog.plugins.pipelineprocessor.db.PipelineStreamConnectionsService;
@@ -92,7 +95,7 @@ public class FilterchainVsPipeline {
         private final PipelineInterpreter interpreter;
 
         public InterpreterState() {
-            final RuleService ruleService = mock(RuleService.class);
+            final RuleService ruleService = mock(MongoDbRuleService.class);
             when(ruleService.loadAll()).thenReturn(Collections.singleton(
                     RuleDao.create("abc",
                                    "title",
@@ -106,7 +109,7 @@ public class FilterchainVsPipeline {
                                    null)
             ));
 
-            final PipelineService pipelineService = mock(PipelineService.class);
+            final PipelineService pipelineService = mock(MongoDbPipelineService.class);
             when(pipelineService.loadAll()).thenReturn(Collections.singleton(
                     PipelineDao.create("cde", "title", "description",
                                        "pipeline \"pipeline\"\n" +
@@ -117,7 +120,7 @@ public class FilterchainVsPipeline {
                                        null)
             ));
 
-            final PipelineStreamConnectionsService pipelineStreamConnectionsService = mock(PipelineStreamConnectionsService.class);
+            final PipelineStreamConnectionsService pipelineStreamConnectionsService = mock(MongoDbPipelineStreamConnectionsService.class);
             final PipelineConnections pipelineStreamConnection = PipelineConnections.create(null,
                                                                                                       "default",
                                                                                                       newHashSet("cde"));
@@ -131,13 +134,14 @@ public class FilterchainVsPipeline {
 
             final PipelineRuleParser parser = setupParser(functions);
 
+            final MetricRegistry metricRegistry = new MetricRegistry();
             interpreter = new PipelineInterpreter(
                     ruleService,
                     pipelineService,
                     pipelineStreamConnectionsService,
                     parser,
                     mock(Journal.class),
-                    mock(MetricRegistry.class),
+                    metricRegistry,
                     Executors.newScheduledThreadPool(1),
                     mock(EventBus.class)
             );

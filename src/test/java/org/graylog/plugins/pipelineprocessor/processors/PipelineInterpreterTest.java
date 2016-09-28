@@ -21,6 +21,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import org.graylog.plugins.pipelineprocessor.ast.functions.Function;
+import org.graylog.plugins.pipelineprocessor.db.mongodb.MongoDbPipelineStreamConnectionsService;
+import org.graylog.plugins.pipelineprocessor.db.mongodb.MongoDbRuleService;
+import org.graylog.plugins.pipelineprocessor.db.mongodb.MongoDbPipelineService;
 import org.graylog.plugins.pipelineprocessor.db.PipelineDao;
 import org.graylog.plugins.pipelineprocessor.db.PipelineService;
 import org.graylog.plugins.pipelineprocessor.db.PipelineStreamConnectionsService;
@@ -50,7 +53,7 @@ public class PipelineInterpreterTest {
 
     @Test
     public void testCreateMessage() {
-        final RuleService ruleService = mock(RuleService.class);
+        final RuleService ruleService = mock(MongoDbRuleService.class);
         when(ruleService.loadAll()).thenReturn(Collections.singleton(
                 RuleDao.create("abc",
                                "title",
@@ -64,7 +67,7 @@ public class PipelineInterpreterTest {
                                null)
         ));
 
-        final PipelineService pipelineService = mock(PipelineService.class);
+        final PipelineService pipelineService = mock(MongoDbPipelineService.class);
         when(pipelineService.loadAll()).thenReturn(Collections.singleton(
                 PipelineDao.create("cde", "title", "description",
                                    "pipeline \"pipeline\"\n" +
@@ -75,7 +78,7 @@ public class PipelineInterpreterTest {
                                    null)
         ));
 
-        final PipelineStreamConnectionsService pipelineStreamConnectionsService = mock(PipelineStreamConnectionsService.class);
+        final PipelineStreamConnectionsService pipelineStreamConnectionsService = mock(MongoDbPipelineStreamConnectionsService.class);
         final PipelineConnections pipelineConnections = PipelineConnections.create(null,
                                                                                                   "default",
                                                                                                   newHashSet("cde"));
