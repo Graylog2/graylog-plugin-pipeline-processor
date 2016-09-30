@@ -1,3 +1,19 @@
+/**
+ * This file is part of Graylog Pipeline Processor.
+ *
+ * Graylog Pipeline Processor is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Graylog Pipeline Processor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Graylog Pipeline Processor.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.graylog.benchmarks.pipeline;
 
 import com.google.inject.AbstractModule;
@@ -8,8 +24,8 @@ import org.graylog.plugins.pipelineprocessor.db.memory.InMemoryRuleService;
 import org.graylog.plugins.pipelineprocessor.functions.ProcessorFunctionsModule;
 import org.graylog.plugins.pipelineprocessor.processors.PipelineInterpreter;
 import org.graylog2.database.NotFoundException;
-import org.graylog2.grok.GrokPattern;
 import org.graylog2.grok.GrokPatternService;
+import org.graylog2.grok.InMemoryGrokPatternService;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.alarms.AlertCondition;
@@ -47,11 +63,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.withSettings;
@@ -238,52 +252,13 @@ public class PipelinePerformanceBenchmarks {
                                     return null;
                                 }
                             });
-                            bind(GrokPatternService.class).toInstance(new GrokPatternService() {
-                                @Override
-                                public GrokPattern load(
-                                        String patternId) throws NotFoundException {
-                                    return null;
-                                }
-
-                                @Override
-                                public Set<GrokPattern> loadAll() {
-                                    return null;
-                                }
-
-                                @Override
-                                public GrokPattern save(
-                                        GrokPattern pattern) throws ValidationException {
-                                    return null;
-                                }
-
-                                @Override
-                                public List<GrokPattern> saveAll(
-                                        Collection<GrokPattern> patterns,
-                                        boolean replace) throws ValidationException {
-                                    return null;
-                                }
-
-                                @Override
-                                public boolean validate(
-                                        GrokPattern pattern) {
-                                    return false;
-                                }
-
-                                @Override
-                                public int delete(String patternId) {
-                                    return 0;
-                                }
-
-                                @Override
-                                public int deleteAll() {
-                                    return 0;
-                                }
-                            });
+                            bind(GrokPatternService.class).to(InMemoryGrokPatternService.class);
                         }
                     });
 
             interpreter = injector.getInstance(PipelineInterpreter.class);
         }
+
     }
 
     @Benchmark
@@ -335,4 +310,5 @@ public class PipelinePerformanceBenchmarks {
     private static <T> T mock(Class<T> classToMock) {
         return Mockito.mock(classToMock, withSettings().stubOnly());
     }
+
 }
