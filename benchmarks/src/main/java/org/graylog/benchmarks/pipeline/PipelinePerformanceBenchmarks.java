@@ -16,11 +16,13 @@
  */
 package org.graylog.benchmarks.pipeline;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.graylog.plugins.pipelineprocessor.db.RuleService;
-import org.graylog.plugins.pipelineprocessor.db.memory.InMemoryRuleService;
+import org.graylog.plugins.pipelineprocessor.db.memory.InMemoryServicesModule;
 import org.graylog.plugins.pipelineprocessor.functions.ProcessorFunctionsModule;
 import org.graylog.plugins.pipelineprocessor.processors.PipelineInterpreter;
 import org.graylog2.database.NotFoundException;
@@ -40,8 +42,8 @@ import org.graylog2.rest.resources.streams.requests.CreateStreamRequest;
 import org.graylog2.shared.bindings.SchedulerBindings;
 import org.graylog2.shared.journal.Journal;
 import org.graylog2.shared.journal.NoopJournal;
+import org.graylog2.streams.StreamImpl;
 import org.graylog2.streams.StreamService;
-import org.mockito.Mockito;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
@@ -68,8 +70,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.withSettings;
-
 public class PipelinePerformanceBenchmarks {
 
     private static final String BENCHMARKS_RESOURCE_DIRECTORY = "/benchmarks";
@@ -78,6 +78,7 @@ public class PipelinePerformanceBenchmarks {
     @State(Scope.Benchmark)
     public static class PipelineConfig {
 
+        // the parameter values are created dynamically
         @Param({})
         private String directoryName;
         private PipelineInterpreter interpreter;
@@ -96,162 +97,12 @@ public class PipelinePerformanceBenchmarks {
             final Injector injector = Guice.createInjector(
                     new ProcessorFunctionsModule(),
                     new SchedulerBindings(),
+                    new InMemoryServicesModule(),
                     new AbstractModule() {
                         @Override
                         protected void configure() {
-                            bind(RuleService.class).to(InMemoryRuleService.class);
-                        }
-                    },
-            new AbstractModule() {
-                        @Override
-                        protected void configure() {
                             bind(Journal.class).to(NoopJournal.class).asEagerSingleton();
-                            bind(StreamService.class).toInstance(new StreamService() {
-                                @Override
-                                public Stream create(Map<String, Object> fields) {
-                                    return null;
-                                }
-
-                                @Override
-                                public Stream create(CreateStreamRequest request, String userId) {
-                                    return null;
-                                }
-
-                                @Override
-                                public Stream load(String id) throws NotFoundException {
-                                    return null;
-                                }
-
-                                @Override
-                                public void destroy(Stream stream) throws NotFoundException {
-
-                                }
-
-                                @Override
-                                public List<Stream> loadAll() {
-                                    return null;
-                                }
-
-                                @Override
-                                public List<Stream> loadAllEnabled() {
-                                    return null;
-                                }
-
-                                @Override
-                                public long count() {
-                                    return 0;
-                                }
-
-                                @Override
-                                public void pause(Stream stream) throws ValidationException {
-
-                                }
-
-                                @Override
-                                public void resume(Stream stream) throws ValidationException {
-
-                                }
-
-                                @Override
-                                public List<StreamRule> getStreamRules(Stream stream) throws NotFoundException {
-                                    return null;
-                                }
-
-                                @Override
-                                public List<Stream> loadAllWithConfiguredAlertConditions() {
-                                    return null;
-                                }
-
-                                @Override
-                                public List<AlertCondition> getAlertConditions(Stream stream) {
-                                    return null;
-                                }
-
-                                @Override
-                                public AlertCondition getAlertCondition(Stream stream,
-                                                                        String conditionId) throws NotFoundException {
-                                    return null;
-                                }
-
-                                @Override
-                                public void addAlertCondition(Stream stream,
-                                                              AlertCondition condition) throws ValidationException {
-
-                                }
-
-                                @Override
-                                public void updateAlertCondition(Stream stream,
-                                                                 AlertCondition condition) throws ValidationException {
-
-                                }
-
-                                @Override
-                                public void removeAlertCondition(Stream stream, String conditionId) {
-
-                                }
-
-                                @Override
-                                public void addAlertReceiver(Stream stream, String type, String name) {
-
-                                }
-
-                                @Override
-                                public void removeAlertReceiver(Stream stream, String type, String name) {
-
-                                }
-
-                                @Override
-                                public void addOutput(Stream stream, Output output) {
-
-                                }
-
-                                @Override
-                                public void removeOutput(Stream stream, Output output) {
-
-                                }
-
-                                @Override
-                                public void removeOutputFromAllStreams(Output output) {
-
-                                }
-
-                                @Override
-                                public <T extends Persisted> int destroy(T model) {
-                                    return 0;
-                                }
-
-                                @Override
-                                public <T extends Persisted> int destroyAll(Class<T> modelClass) {
-                                    return 0;
-                                }
-
-                                @Override
-                                public <T extends Persisted> String save(T model) throws ValidationException {
-                                    return null;
-                                }
-
-                                @Override
-                                public <T extends Persisted> String saveWithoutValidation(T model) {
-                                    return null;
-                                }
-
-                                @Override
-                                public <T extends Persisted> Map<String, List<ValidationResult>> validate(T model,
-                                                                                                          Map<String, Object> fields) {
-                                    return null;
-                                }
-
-                                @Override
-                                public <T extends Persisted> Map<String, List<ValidationResult>> validate(T model) {
-                                    return null;
-                                }
-
-                                @Override
-                                public Map<String, List<ValidationResult>> validate(Map<String, Validator> validators,
-                                                                                    Map<String, Object> fields) {
-                                    return null;
-                                }
-                            });
+                            bind(StreamService.class).toInstance(new DummyStreamService());
                             bind(GrokPatternService.class).to(InMemoryGrokPatternService.class);
                         }
                     });
@@ -259,6 +110,171 @@ public class PipelinePerformanceBenchmarks {
             interpreter = injector.getInstance(PipelineInterpreter.class);
         }
 
+        /**
+         * Dummy stream service that only allows setting and getting stream definitions, but no rules, alert conditions, receivers or outputs.
+         */
+        private static class DummyStreamService implements StreamService {
+
+            private final Map<String, Stream> store = new MapMaker().makeMap();
+            @Override
+            public Stream create(Map<String, Object> fields) {
+                return new StreamImpl(fields);
+            }
+
+            @Override
+            public Stream create(CreateStreamRequest cr, String userId) {
+                Map<String, Object> streamData = Maps.newHashMap();
+                streamData.put(StreamImpl.FIELD_TITLE, cr.title());
+                streamData.put(StreamImpl.FIELD_DESCRIPTION, cr.description());
+                streamData.put(StreamImpl.FIELD_CREATOR_USER_ID, userId);
+                streamData.put(StreamImpl.FIELD_CREATED_AT, Tools.nowUTC());
+                streamData.put(StreamImpl.FIELD_CONTENT_PACK, cr.contentPack());
+                streamData.put(StreamImpl.FIELD_MATCHING_TYPE, cr.matchingType().toString());
+
+                return create(streamData);
+            }
+
+            @Override
+            public Stream load(String id) throws NotFoundException {
+                final Stream stream = store.get(id);
+                if (stream == null) {
+                    throw new NotFoundException();
+                }
+                return stream;
+            }
+
+            @Override
+            public void destroy(Stream stream) throws NotFoundException {
+                if (store.remove(stream.getId()) == null) {
+                    throw new NotFoundException();
+                }
+            }
+
+            @Override
+            public List<Stream> loadAll() {
+                return ImmutableList.copyOf(store.values());
+            }
+
+            @Override
+            public List<Stream> loadAllEnabled() {
+                return store.values().stream().filter(stream -> !stream.getDisabled()).collect(Collectors.toList());
+            }
+
+            @Override
+            public long count() {
+                return store.size();
+            }
+
+            @Override
+            public void pause(Stream stream) throws ValidationException {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void resume(Stream stream) throws ValidationException {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public List<StreamRule> getStreamRules(Stream stream) throws NotFoundException {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public List<Stream> loadAllWithConfiguredAlertConditions() {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public List<AlertCondition> getAlertConditions(Stream stream) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public AlertCondition getAlertCondition(Stream stream,
+                                                    String conditionId) throws NotFoundException {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void addAlertCondition(Stream stream,
+                                          AlertCondition condition) throws ValidationException {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void updateAlertCondition(Stream stream,
+                                             AlertCondition condition) throws ValidationException {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void removeAlertCondition(Stream stream, String conditionId) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void addAlertReceiver(Stream stream, String type, String name) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void removeAlertReceiver(Stream stream, String type, String name) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void addOutput(Stream stream, Output output) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void removeOutput(Stream stream, Output output) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public void removeOutputFromAllStreams(Output output) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public <T extends Persisted> int destroy(T model) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public <T extends Persisted> int destroyAll(Class<T> modelClass) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public <T extends Persisted> String save(T model) throws ValidationException {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public <T extends Persisted> String saveWithoutValidation(T model) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public <T extends Persisted> Map<String, List<ValidationResult>> validate(T model,
+                                                                                      Map<String, Object> fields) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public <T extends Persisted> Map<String, List<ValidationResult>> validate(T model) {
+                throw new IllegalStateException("no implemented");
+            }
+
+            @Override
+            public Map<String, List<ValidationResult>> validate(Map<String, Validator> validators,
+                                                                Map<String, Object> fields) {
+                throw new IllegalStateException("no implemented");
+            }
+        }
     }
 
     @Benchmark
@@ -306,9 +322,4 @@ public class PipelinePerformanceBenchmarks {
         }
         return benchmarksPath;
     }
-
-    private static <T> T mock(Class<T> classToMock) {
-        return Mockito.mock(classToMock, withSettings().stubOnly());
-    }
-
 }

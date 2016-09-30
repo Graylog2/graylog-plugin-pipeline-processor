@@ -16,6 +16,7 @@
  */
 package org.graylog.plugins.pipelineprocessor.db.memory;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
 import org.graylog.plugins.pipelineprocessor.db.RuleDao;
@@ -68,7 +69,7 @@ public class InMemoryRuleService implements RuleService {
 
     @Override
     public Collection<RuleDao> loadAll() {
-        return store.values();
+        return ImmutableSet.copyOf(store.values());
     }
 
     @Override
