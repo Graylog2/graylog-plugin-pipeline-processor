@@ -16,15 +16,31 @@
  */
 package org.graylog.benchmarks.pipeline;
 
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.MetricRegistry;
+import com.github.joschi.jadconfig.RepositoryException;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.moandjiezana.toml.Toml;
+import org.graylog.plugins.pipelineprocessor.ast.Pipeline;
+import org.graylog.plugins.pipelineprocessor.ast.Rule;
+import org.graylog.plugins.pipelineprocessor.db.PipelineDao;
+import org.graylog.plugins.pipelineprocessor.db.PipelineService;
+import org.graylog.plugins.pipelineprocessor.db.PipelineStreamConnectionsService;
+import org.graylog.plugins.pipelineprocessor.db.RuleDao;
+import org.graylog.plugins.pipelineprocessor.db.RuleService;
 import org.graylog.plugins.pipelineprocessor.db.memory.InMemoryServicesModule;
 import org.graylog.plugins.pipelineprocessor.functions.ProcessorFunctionsModule;
+import org.graylog.plugins.pipelineprocessor.parser.PipelineRuleParser;
 import org.graylog.plugins.pipelineprocessor.processors.PipelineInterpreter;
+import org.graylog.plugins.pipelineprocessor.rest.PipelineConnections;
 import org.graylog2.database.NotFoundException;
 import org.graylog2.grok.GrokPatternService;
 import org.graylog2.grok.InMemoryGrokPatternService;
@@ -40,26 +56,33 @@ import org.graylog2.plugin.streams.Stream;
 import org.graylog2.plugin.streams.StreamRule;
 import org.graylog2.rest.resources.streams.requests.CreateStreamRequest;
 import org.graylog2.shared.bindings.SchedulerBindings;
+import org.graylog2.shared.bindings.providers.MetricRegistryProvider;
 import org.graylog2.shared.journal.Journal;
 import org.graylog2.shared.journal.NoopJournal;
 import org.graylog2.streams.StreamImpl;
 import org.graylog2.streams.StreamService;
+import org.joda.time.DateTime;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -68,9 +91,13 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
+
 public class PipelinePerformanceBenchmarks {
+    private static final Logger LOG = LoggerFactory.getLogger(PipelinePerformanceBenchmarks.class);
 
     private static final String BENCHMARKS_RESOURCE_DIRECTORY = "/benchmarks";
     private static final Message MESSAGE = new Message("hallo welt", "127.0.0.1", Tools.nowUTC());
@@ -82,19 +109,13 @@ public class PipelinePerformanceBenchmarks {
         @Param({})
         private String directoryName;
         private PipelineInterpreter interpreter;
+        private BenchmarkConfig config;
+        private Injector injector;
 
         @Setup
-        public void setup() throws URISyntaxException, IOException {
-            final Path path = getResourcePath();
+        public void setup() throws URISyntaxException, IOException, com.github.joschi.jadconfig.ValidationException, RepositoryException, ValidationException {
 
-            Files.list(path.resolve(directoryName))
-                    .map(Path::toFile)
-                    .filter(File::isFile)
-                    .forEach(inputFile -> {
-                        // TODO actually
-                    });
-
-            final Injector injector = Guice.createInjector(
+            injector = Guice.createInjector(
                     new ProcessorFunctionsModule(),
                     new SchedulerBindings(),
                     new InMemoryServicesModule(),
@@ -104,10 +125,121 @@ public class PipelinePerformanceBenchmarks {
                             bind(Journal.class).to(NoopJournal.class).asEagerSingleton();
                             bind(StreamService.class).toInstance(new DummyStreamService());
                             bind(GrokPatternService.class).to(InMemoryGrokPatternService.class);
+                            bind(MetricRegistry.class).toProvider(MetricRegistryProvider.class);
                         }
                     });
 
+            // resolve types of benchmark configuration, to be loaded into the various services.
+            final Path path = getResourcePath();
+            Multimap<Type, File> configFiles = MultimapBuilder
+                    .enumKeys(Type.class)
+                    .arrayListValues()
+                    .build();
+            Files.list(path.resolve(directoryName))
+                    .map(Path::toFile)
+                    .filter(File::isFile)
+                    .forEach(inputFile -> {
+                        final String name = inputFile.getName();
+                        if (name.endsWith(".rule")) {
+                            configFiles.put(Type.RULE, inputFile);
+                        } else if (name.endsWith(".pipeline")) {
+                            configFiles.put(Type.PIPELINE, inputFile);
+                        } else if (name.equals("benchmark.toml")) {
+                            configFiles.put(Type.CONFIG, inputFile);
+                        } else {
+                            LOG.warn("unrecognized file {} found, it will be ignored.", inputFile);
+                        }
+                    });
+
+            if (configFiles.containsKey(Type.CONFIG)) {
+                config = new Toml().read(getOnlyElement(configFiles.get(Type.CONFIG))).to(BenchmarkConfig.class);
+            } else {
+                LOG.error("The benchmark directory must include a benchmark.toml file! Aborting.");
+                System.exit(-1);
+            }
+            final PipelineRuleParser parser = injector.getInstance(PipelineRuleParser.class);
+            final RuleService ruleService = injector.getInstance(RuleService.class);
+
+            configFiles.get(Type.RULE).forEach(file -> {
+                final String ruleText = readFile(file);
+                if (ruleText == null) {
+                    return;
+                }
+                final Rule rule = parser.parseRule(ruleText, true);
+                final DateTime now = Tools.nowUTC();
+                final RuleDao saved = ruleService.save(RuleDao.create(null,
+                                                                      rule.name(),
+                                                                      null,
+                                                                      ruleText,
+                                                                      now,
+                                                                      now));
+                LOG.debug("Read and saved rule {} with Id {}", saved.title(), saved.id());
+            });
+
+            final PipelineService pipelineService = injector.getInstance(PipelineService.class);
+            configFiles.get(Type.PIPELINE).forEach(file -> {
+                final String pipelineText = readFile(file);
+                if (pipelineText == null) {
+                    return;
+                }
+                final Pipeline pipeline = parser.parsePipeline(null, pipelineText);
+                final DateTime now = Tools.nowUTC();
+                final PipelineDao saved = pipelineService.save(PipelineDao.create(null,
+                                                                                  pipeline.name(),
+                                                                                  null,
+                                                                                  pipelineText,
+                                                                                  now,
+                                                                                  now));
+                LOG.debug("Read and saved pipeline {} with Id {}", saved.title(), saved.id());
+            });
+            final ImmutableMap<String, PipelineDao> pipelineTitleIndex = Maps.uniqueIndex(pipelineService.loadAll(),
+                                                                                                     PipelineDao::title);
+            final PipelineStreamConnectionsService connectionsService = injector.getInstance(PipelineStreamConnectionsService.class);
+            final StreamService streamService = injector.getInstance(StreamService.class);
+            if (config.streams == null || config.streams.isEmpty()) {
+                LOG.info("No streams defined, this benchmark won't match any messages!");
+            } else {
+                for (BenchmarkConfig.StreamDescription streamDescription : config.streams) {
+                    final Stream stream = streamService.create(Collections.emptyMap());
+                    stream.setTitle(streamDescription.name);
+                    if (streamDescription.name.equals("default")) {
+                        stream.setDefaultStream(true);
+                    }
+                    stream.setDescription(streamDescription.description);
+                    stream.setDisabled(false);
+                    final String id = streamService.save(stream);
+
+                    // TODO default stream handling is really wonky now.
+                    connectionsService.save(PipelineConnections.create(null, stream.isDefaultStream() ? "default" : id,
+                                                                       streamDescription.pipelines.stream()
+                                                                               .map(pipelineTitleIndex::get)
+                                                                               .map(PipelineDao::id)
+                                                                               .collect(Collectors.toSet())));
+                }
+            }
+
             interpreter = injector.getInstance(PipelineInterpreter.class);
+        }
+
+        @TearDown
+        public void dumpMetrics() throws IOException {
+
+            final MetricRegistry metrics = injector.getInstance(MetricRegistry.class);
+
+            final ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics)
+                    .outputTo(new PrintStream("/tmp/bench-" + directoryName + ".txt"))
+                    .build();
+            reporter.report();
+
+        }
+
+        private String readFile(File file) {
+            try {
+                return com.google.common.io.Files.toString(file, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                LOG.error("Cannot read rule file, skipping it. This will likely fail the benchmark.", e);
+                return null;
+            }
         }
 
         /**
@@ -116,6 +248,7 @@ public class PipelinePerformanceBenchmarks {
         private static class DummyStreamService implements StreamService {
 
             private final Map<String, Stream> store = new MapMaker().makeMap();
+
             @Override
             public Stream create(Map<String, Object> fields) {
                 return new StreamImpl(fields);
@@ -250,7 +383,8 @@ public class PipelinePerformanceBenchmarks {
 
             @Override
             public <T extends Persisted> String save(T model) throws ValidationException {
-                throw new IllegalStateException("no implemented");
+                store.put(model.getId(), (Stream) model);
+                return model.getId();
             }
 
             @Override
@@ -275,6 +409,27 @@ public class PipelinePerformanceBenchmarks {
                 throw new IllegalStateException("no implemented");
             }
         }
+
+        private class BenchmarkConfig {
+            private String name;
+
+            private List<StreamDescription> streams;
+
+            private class StreamDescription {
+                private String name;
+                private String description;
+                private Set<String> pipelines;
+            }
+        }
+
+        /**
+         * type of configuration file, either global config (name, streams, connections), a rule source file, a pipeline source file
+         */
+        private enum Type {
+            CONFIG,
+            RULE,
+            PIPELINE
+        }
     }
 
     @Benchmark
@@ -286,9 +441,9 @@ public class PipelinePerformanceBenchmarks {
         final String[] values = loadBenchmarkNames().toArray(new String[]{});
         Options opt = new OptionsBuilder()
                 .include(PipelinePerformanceBenchmarks.class.getSimpleName())
-                .warmupIterations(3)
+                .warmupIterations(1)
                 .warmupTime(TimeValue.seconds(5))
-                .measurementIterations(5)
+                .measurementIterations(2)
                 .measurementTime(TimeValue.seconds(20))
                 .threads(1)
                 .forks(1)

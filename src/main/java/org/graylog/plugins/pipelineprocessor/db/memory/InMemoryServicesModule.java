@@ -8,8 +8,8 @@ import org.graylog2.plugin.PluginModule;
 public class InMemoryServicesModule extends PluginModule {
     @Override
     protected void configure() {
-        bind(RuleService.class).to(InMemoryRuleService.class);
-        bind(PipelineService.class).to(InMemoryPipelineService.class);
-        bind(PipelineStreamConnectionsService.class).to(InMemoryPipelineStreamConnectionsService.class);
+        bind(RuleService.class).to(InMemoryRuleService.class).asEagerSingleton();
+        bind(PipelineService.class).to(InMemoryPipelineService.class).asEagerSingleton();
+        bind(PipelineStreamConnectionsService.class).to(InMemoryPipelineStreamConnectionsService.class).asEagerSingleton();
     }
 }
