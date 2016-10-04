@@ -410,6 +410,7 @@ public class PipelinePerformanceBenchmarks {
             }
         }
 
+        @SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
         private class BenchmarkConfig {
             private String name;
 
