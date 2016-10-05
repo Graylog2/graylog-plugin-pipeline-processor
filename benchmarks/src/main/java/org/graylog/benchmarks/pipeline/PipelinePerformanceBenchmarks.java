@@ -18,7 +18,6 @@ package org.graylog.benchmarks.pipeline;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricRegistry;
-import com.github.joschi.jadconfig.RepositoryException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
@@ -111,9 +110,17 @@ public class PipelinePerformanceBenchmarks {
         private PipelineInterpreter interpreter;
         private BenchmarkConfig config;
         private Injector injector;
+        // enable when using yourkit for single runs
+//        private Controller controller;
 
         @Setup
-        public void setup() throws URISyntaxException, IOException, com.github.joschi.jadconfig.ValidationException, RepositoryException, ValidationException {
+        public void setup() throws Exception {
+
+            // enable when using yourkit for single runs
+//            controller = new Controller();
+//            controller.startCPUTracing(null);
+//            controller.startAllocationRecording(null);
+//            controller.enableStackTelemetry();
 
             injector = Guice.createInjector(
                     new ProcessorFunctionsModule(),
@@ -222,8 +229,10 @@ public class PipelinePerformanceBenchmarks {
         }
 
         @TearDown
-        public void dumpMetrics() throws IOException {
+        public void dumpMetrics() throws Exception {
 
+            // enable when using yourkit for single runs
+//            controller.captureSnapshot(Controller.SNAPSHOT_WITH_HEAP);
             final MetricRegistry metrics = injector.getInstance(MetricRegistry.class);
 
             final ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics)
@@ -439,15 +448,21 @@ public class PipelinePerformanceBenchmarks {
     }
 
     public static void main(String[] args) throws RunnerException, URISyntaxException, IOException {
-        final String[] values = loadBenchmarkNames().toArray(new String[]{});
+        boolean fork = System.getProperty("profile") == null;
+
+        final String singleBenchmarkName = System.getProperty("benchmark.name");
+        final String[] values = singleBenchmarkName != null ?
+                new String[] {singleBenchmarkName} :
+                loadBenchmarkNames().toArray(new String[]{});
+
         Options opt = new OptionsBuilder()
                 .include(PipelinePerformanceBenchmarks.class.getSimpleName())
                 .warmupIterations(1)
                 .warmupTime(TimeValue.seconds(5))
-                .measurementIterations(2)
+                .measurementIterations(10)
                 .measurementTime(TimeValue.seconds(20))
                 .threads(1)
-                .forks(1)
+                .forks(fork ? 1 : 0)
                 .param("directoryName", values)
                 .build();
 
