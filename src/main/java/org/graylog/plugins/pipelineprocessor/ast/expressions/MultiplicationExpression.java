@@ -39,12 +39,12 @@ public class MultiplicationExpression extends BinaryExpression implements Numeri
 
     @Override
     public long evaluateLong(EvaluationContext context) {
-        return (Long) firstNonNull(evaluateUnsafe(context), 0);
+        return (long) firstNonNull(evaluateUnsafe(context), 0);
     }
 
     @Override
     public double evaluateDouble(EvaluationContext context) {
-        return (Double) firstNonNull(evaluateUnsafe(context), 0);
+        return (double) firstNonNull(evaluateUnsafe(context), 0d);
     }
 
     @SuppressWarnings("Duplicates")
