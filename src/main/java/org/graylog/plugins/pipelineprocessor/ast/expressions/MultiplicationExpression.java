@@ -20,13 +20,12 @@ import org.antlr.v4.runtime.Token;
 import org.graylog.plugins.pipelineprocessor.EvaluationContext;
 
 import javax.annotation.Nullable;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 
 public class MultiplicationExpression extends BinaryExpression implements NumericExpression  {
     private final char operator;
-    private AtomicReference<Class> type = new AtomicReference<>();
+    private Class type;
 
     public MultiplicationExpression(Token start, Expression left, Expression right, char operator) {
         super(start, left, right);
@@ -48,6 +47,7 @@ public class MultiplicationExpression extends BinaryExpression implements Numeri
         return (Double) firstNonNull(evaluateUnsafe(context), 0);
     }
 
+    @SuppressWarnings("Duplicates")
     @Nullable
     @Override
     public Object evaluateUnsafe(EvaluationContext context) {
@@ -86,31 +86,15 @@ public class MultiplicationExpression extends BinaryExpression implements Numeri
 
     @Override
     public Class getType() {
-        final Class theType = type.get();
-        if (theType != null) {
-            return theType;
-        }
-
-        final Class leftType = left.getType();
-        final Class rightType = right.getType();
-        if (leftType.equals(rightType) && Number.class.isAssignableFrom(leftType)) {
-            // ok to proceed
-            type.set(leftType);
-            return leftType;
-        } else {
-            // types must be at least equal and numeric, this is a type checker bug
-            if (left instanceof Number) {
-                throw new IllegalArgumentException("Cannot multiply values of different types: " + leftType.getSimpleName() + " and " + rightType.getSimpleName());
-            } else {
-                throw new IllegalArgumentException("Cannot multiply non-numeric types: " + leftType.getSimpleName() + " and " + rightType.getSimpleName());
-            }
-        }
+        return type;
     }
 
+    public void setType(Class type) {
+        this.type = type;
+    }
 
     @Override
     public String toString() {
         return left.toString() + " " + operator + " " + right.toString();
     }
-
 }

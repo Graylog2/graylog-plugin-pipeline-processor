@@ -647,6 +647,36 @@ public class PipelineRuleParser {
                 varRefExpression.setType(expression.getType());
             }
         }
+
+        @Override
+        public void exitAddition(RuleLangParser.AdditionContext ctx) {
+            final AdditionExpression expr = (AdditionExpression) parseContext.expressions().get(ctx);
+            final Class leftType = expr.left().getType();
+            final Class rightType = expr.right().getType();
+
+            if (leftType.equals(rightType)) {
+                // propagate left type
+                expr.setType(leftType);
+            } else {
+                // this will be detected as an error later
+                expr.setType(Void.class);
+            }
+        }
+
+        @Override
+        public void exitMultiplication(RuleLangParser.MultiplicationContext ctx) {
+            final MultiplicationExpression expr = (MultiplicationExpression) parseContext.expressions().get(ctx);
+            final Class leftType = expr.left().getType();
+            final Class rightType = expr.right().getType();
+
+            if (leftType.equals(rightType)) {
+                // propagate left type
+                expr.setType(leftType);
+            } else {
+                // this will be detected as an error later
+                expr.setType(Void.class);
+            }
+        }
     }
 
     private class RuleTypeChecker extends RuleLangBaseListener {
@@ -697,7 +727,7 @@ public class PipelineRuleParser {
             final Class leftType = binaryExpr.left().getType();
             final Class rightType = binaryExpr.right().getType();
 
-            if (!leftType.equals(rightType)) {
+            if (!leftType.equals(rightType) || Void.class.equals(leftType) || Void.class.equals(rightType)) {
                 parseContext.addError(new IncompatibleTypes(ctx, binaryExpr));
             }
         }
