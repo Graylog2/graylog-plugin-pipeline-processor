@@ -35,7 +35,7 @@ public abstract class Pipeline {
     }
 
     public static Pipeline empty(String name) {
-        return builder().name(name).stages(Sets.<Stage>newTreeSet()).build();
+        return builder().name(name).stages(Sets.newTreeSet()).build();
     }
 
     public abstract Builder toBuilder();

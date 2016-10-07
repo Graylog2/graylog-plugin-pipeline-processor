@@ -215,37 +215,14 @@ public class PipelineInterpreter implements MessageProcessor {
                 // this makes a copy of the list!
                 final Set<String> initialStreamIds = message.getStreams().stream().map(Stream::getId).collect(Collectors.toSet());
 
-                final ImmutableSetMultimap<String, Pipeline> streamConnection = streamPipelineConnections.get();
+                pipelinesToRun = selectPipelines(interpreterListener,
+                                                 processingBlacklist,
+                                                 message,
+                                                 initialStreamIds);
 
-                if (initialStreamIds.isEmpty()) {
-                    if (processingBlacklist.contains(tuple(msgId, "default"))) {
-                        // already processed default pipeline for this message
-                        pipelinesToRun = ImmutableSet.of();
-                        log.debug("[{}] already processed default stream, skipping", msgId);
-                    } else {
-                        // get the default stream pipeline connections for this message
-                        pipelinesToRun = streamConnection.get("default");
-                        interpreterListener.processDefaultStream(message, pipelinesToRun);
-                        if (log.isDebugEnabled()) {
-                            log.debug("[{}] running default stream pipelines: [{}]",
-                                      msgId,
-                                      pipelinesToRun.stream().map(Pipeline::name).toArray());
-                        }
-                    }
-                } else {
-                    // 2. if a message-stream combination has already been processed (is in the set), skip that execution
-                    final Set<String> streamsIds = initialStreamIds.stream()
-                            .filter(streamId -> !processingBlacklist.contains(tuple(msgId, streamId)))
-                            .filter(streamConnection::containsKey)
-                            .collect(Collectors.toSet());
-                    pipelinesToRun = ImmutableSet.copyOf(streamsIds.stream()
-                            .flatMap(streamId -> streamConnection.get(streamId).stream())
-                            .collect(Collectors.toSet()));
-                    interpreterListener.processStreams(message, pipelinesToRun, streamsIds);
-                    log.debug("[{}] running pipelines {} for streams {}", msgId, pipelinesToRun, streamsIds);
-                }
-
-                toProcess.addAll(processForPipelines(message, msgId, pipelinesToRun.stream().map(Pipeline::id).collect(Collectors.toSet()), interpreterListener));
+                toProcess.addAll(processForPipelines(message,
+                                                     pipelinesToRun,
+                                                     interpreterListener));
 
                 boolean addedStreams = false;
                 // 5. add each message-stream combination to the blacklist set
@@ -281,22 +258,75 @@ public class PipelineInterpreter implements MessageProcessor {
         return new MessageCollection(fullyProcessed);
     }
 
-    public List<Message> processForPipelines(Message message, String msgId, Set<String> pipelines, InterpreterListener interpreterListener) {
-        final ImmutableSet<Pipeline> pipelinesToRun = ImmutableSet.copyOf(pipelines
-                .stream()
-                .map(pipelineId -> this.currentPipelines.get().get(pipelineId))
-                .filter(pipeline -> pipeline != null)
-                .collect(Collectors.toSet()));
+    private ImmutableSet<Pipeline> selectPipelines(InterpreterListener interpreterListener,
+                                                   Set<Tuple2<String, String>> processingBlacklist,
+                                                   Message message,
+                                                   Set<String> initialStreamIds) {
+        final String msgId = message.getId();
+        final ImmutableSet<Pipeline> pipelinesToRun;
+        final ImmutableSetMultimap<String, Pipeline> streamConnection = streamPipelineConnections.get();
 
-        return processForResolvedPipelines(message, msgId, pipelinesToRun, interpreterListener);
+        if (initialStreamIds.isEmpty()) {
+            if (processingBlacklist.contains(tuple(msgId, "default"))) {
+                // already processed default pipeline for this message
+                pipelinesToRun = ImmutableSet.of();
+                log.debug("[{}] already processed default stream, skipping", msgId);
+            } else {
+                // get the default stream pipeline connections for this message
+                pipelinesToRun = streamConnection.get("default");
+                interpreterListener.processDefaultStream(message, pipelinesToRun);
+                if (log.isDebugEnabled()) {
+                    log.debug("[{}] running default stream pipelines: [{}]",
+                              msgId,
+                              pipelinesToRun.stream().map(Pipeline::name).toArray());
+                }
+            }
+        } else {
+            // 2. if a message-stream combination has already been processed (is in the set), skip that execution
+            final Set<String> streamsIds = initialStreamIds.stream()
+                    .filter(streamId -> !processingBlacklist.contains(tuple(msgId, streamId)))
+                    .filter(streamConnection::containsKey)
+                    .collect(Collectors.toSet());
+            pipelinesToRun = ImmutableSet.copyOf(streamsIds.stream()
+                    .flatMap(streamId -> streamConnection.get(streamId).stream())
+                    .collect(Collectors.toSet()));
+            interpreterListener.processStreams(message, pipelinesToRun, streamsIds);
+            log.debug("[{}] running pipelines {} for streams {}", msgId, pipelinesToRun, streamsIds);
+        }
+        return pipelinesToRun;
     }
 
-    public List<Message> processForResolvedPipelines(Message message, String msgId, Set<Pipeline> pipelines, InterpreterListener interpreterListener) {
+    /**
+     * Helper to run pipelines you only have the IDs of.
+     *
+     * @param message the message to process
+     * @param pipelineIdsToRun the IDs of the pipelines you wish to run
+     * @param interpreterListener the listener
+     * @return the new set of messages
+     */
+    public List<Message> processForPipelineIds(Message message,
+                                               Set<String> pipelineIdsToRun,
+                                               InterpreterListener interpreterListener) {
+        final ImmutableMap<String, Pipeline> pipelineImmutableMap = this.currentPipelines.get();
+
+        return processForPipelines(message,
+                                   pipelineIdsToRun
+                                           .stream()
+                                           .map(pipelineImmutableMap::get)
+                                           .filter(pipeline -> pipeline != null)
+                                           .collect(Collectors.toSet()),
+                                   interpreterListener);
+    }
+
+    private List<Message> processForPipelines(Message message,
+                                              Set<Pipeline> pipelinesToRun,
+                                              InterpreterListener interpreterListener) {
+        final String msgId = message.getId();
         final List<Message> result = new ArrayList<>();
         // record execution of pipeline in metrics
-        pipelines.forEach(pipeline -> metricRegistry.counter(name(Pipeline.class, pipeline.id(), "executed")).inc());
+        pipelinesToRun.forEach(pipeline -> metricRegistry.counter(name(Pipeline.class, pipeline.id(), "executed")).inc());
 
-        final StageIterator stages = new StageIterator(pipelines);
+        final StageIterator stages = new StageIterator(pipelinesToRun);
         final Set<Pipeline> pipelinesToSkip = Sets.newHashSet();
 
         // iterate through all stages for all matching pipelines, per "stage slice" instead of per pipeline.

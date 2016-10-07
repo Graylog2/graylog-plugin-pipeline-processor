@@ -33,6 +33,7 @@ import org.graylog2.plugin.decorators.SearchResponseDecorator;
 import org.graylog2.rest.models.messages.responses.ResultMessageSummary;
 import org.graylog2.rest.resources.search.responses.SearchResponse;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,8 @@ public class PipelineProcessorMessageDecorator implements SearchResponseDecorato
     private static final String CONFIG_FIELD_PIPELINE = "pipeline";
 
     private final PipelineInterpreter pipelineInterpreter;
-    private final ImmutableSet<String> pipelines;
+    @Nullable
+    private final String pipelineId;
 
     public interface Factory extends SearchResponseDecorator.Factory {
         @Override
@@ -90,26 +92,22 @@ public class PipelineProcessorMessageDecorator implements SearchResponseDecorato
     public PipelineProcessorMessageDecorator(PipelineInterpreter pipelineInterpreter,
                                              @Assisted Decorator decorator) {
         this.pipelineInterpreter = pipelineInterpreter;
-        final String pipelineId = (String)decorator.config().get(CONFIG_FIELD_PIPELINE);
-        if (Strings.isNullOrEmpty(pipelineId)) {
-            this.pipelines = ImmutableSet.of();
-        } else {
-            this.pipelines = ImmutableSet.of(pipelineId);
-        }
+        this.pipelineId = Strings.emptyToNull((String) decorator.config().get(CONFIG_FIELD_PIPELINE));
     }
 
     @Override
     public SearchResponse apply(SearchResponse searchResponse) {
-        final List<ResultMessageSummary> results = new ArrayList<>();
-        if (pipelines.isEmpty()) {
+        if (pipelineId == null) {
             return searchResponse;
         }
+        final List<ResultMessageSummary> results = new ArrayList<>();
+
         searchResponse.messages().forEach((inMessage) -> {
             final Message message = new Message(inMessage.message());
-            final List<Message> additionalCreatedMessages = pipelineInterpreter.processForPipelines(message,
-                    message.getId(),
-                    pipelines,
-                    new NoopInterpreterListener());
+            final List<Message> additionalCreatedMessages =
+                    pipelineInterpreter.processForPipelineIds(message,
+                                                              ImmutableSet.of(pipelineId),
+                                                              new NoopInterpreterListener());
 
             results.add(ResultMessageSummary.create(inMessage.highlightRanges(), message.getFields(), inMessage.index()));
             additionalCreatedMessages.forEach((additionalMessage) -> {
