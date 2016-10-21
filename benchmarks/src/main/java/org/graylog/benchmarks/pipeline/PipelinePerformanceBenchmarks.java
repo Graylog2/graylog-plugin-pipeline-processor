@@ -33,7 +33,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.moandjiezana.toml.Toml;
-import com.yourkit.api.Controller;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -114,9 +113,8 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 
 public class PipelinePerformanceBenchmarks {
     private static final Logger LOG = LoggerFactory.getLogger(PipelinePerformanceBenchmarks.class);
+    public static final Message MESSAGE = new Message("hallo welt", "127.0.0.1", Tools.nowUTC());
 
-    private static final String BENCHMARKS_RESOURCE_DIRECTORY = "/benchmarks";
-    private static final Message MESSAGE = new Message("hallo welt", "127.0.0.1", Tools.nowUTC());
     private static String benchmarkDir = System.getProperty("benchmarkDir", "benchmarks");
 
     @State(Scope.Benchmark)
@@ -247,23 +245,29 @@ public class PipelinePerformanceBenchmarks {
                 }
             }
 
+            final List<Message> loadedMessages = Lists.newArrayList();
             configFiles.get(Type.MESSAGES).forEach(file -> {
                 try {
-                    final List<Message> messages = com.google.common.io.Files.readLines(file,
-                                                                                        StandardCharsets.UTF_8,
-                                                                                        new CsvMessageFileProcessor());
-                    messageCycler = Iterators.cycle(messages);
-                    LOG.warn("read messages");
+                    loadedMessages.addAll(com.google.common.io.Files.readLines(file,
+                                                                               StandardCharsets.UTF_8,
+                                                                               new CsvMessageFileProcessor()));
                 } catch (IOException e) {
                     System.err.println(e.getMessage());
                     System.exit(-3);
                 }
             });
+            if (!loadedMessages.isEmpty()) {
+                messageCycler = Iterators.cycle(loadedMessages);
+            }
+
             if (!configFiles.containsKey(Type.MESSAGES)) {
-                final ArrayList<Message> objects = Lists.newArrayList();
-                Seq.range(0, 25000).forEach(i -> objects.add(new Message("hallo welt", "127.0.0.1", Tools.nowUTC())));
-                messageCycler = Iterators.cycle(objects);
-                LOG.warn("created messages");
+                if ("generate".equalsIgnoreCase(config.messages)) {
+                    final ArrayList<Message> objects = Lists.newArrayList();
+                    Seq.range(0, 25000).forEach(i -> objects.add(new Message("hallo welt", "127.0.0.1", Tools.nowUTC())));
+                    messageCycler = Iterators.cycle(objects);
+                } else {
+                    messageCycler = Iterators.cycle(MESSAGE);
+                }
             }
 
             interpreter = injector.getInstance(PipelineInterpreter.class);
@@ -498,6 +502,8 @@ public class PipelinePerformanceBenchmarks {
             private String name;
 
             private List<StreamDescription> streams;
+
+            private String messages;
 
             private class StreamDescription {
                 private String name;
