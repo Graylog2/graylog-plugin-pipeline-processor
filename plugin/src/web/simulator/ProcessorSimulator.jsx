@@ -1,10 +1,13 @@
 import React from 'react';
-import { Col, Input, Row } from 'react-bootstrap';
+import { Col, Input, Panel, Row } from 'react-bootstrap';
 import naturalSort from 'javascript-natural-sort';
+import { LinkContainer } from 'react-router-bootstrap';
 
 import { Select } from 'components/common';
 import RawMessageLoader from 'components/messageloaders/RawMessageLoader';
 import SimulationResults from './SimulationResults';
+
+import Routes from 'routing/Routes';
 
 import SimulatorActions from './SimulatorActions';
 // eslint-disable-next-line no-unused-vars
@@ -58,6 +61,22 @@ const ProcessorSimulator = React.createClass({
   },
 
   render() {
+    if (this.props.streams.length === 0) {
+      return (
+        <div>
+          <Row className="row-sm">
+            <Col md={8} mdOffset={2}>
+              <Panel bsStyle="danger" header="No streams found">
+                Pipelines operate on streams, but your system currently has no streams. Please{' '}
+                <LinkContainer to={Routes.STREAMS}><a>create a stream</a></LinkContainer>{' '}
+                and come back here later to test pipelines processing messages in your new stream.
+              </Panel>
+            </Col>
+          </Row>
+        </div>
+      );
+    }
+
     const streamHelp = (
       <span>
         Select a stream to use during simulation, the <em>Default</em> stream is used by default.
