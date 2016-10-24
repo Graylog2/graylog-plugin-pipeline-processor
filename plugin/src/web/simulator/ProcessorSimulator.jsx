@@ -13,15 +13,20 @@ import SimulatorActions from './SimulatorActions';
 // eslint-disable-next-line no-unused-vars
 import SimulatorStore from './SimulatorStore';
 
+const DEFAULT_STREAM_ID = '000000000000000000000001';
+
 const ProcessorSimulator = React.createClass({
   propTypes: {
     streams: React.PropTypes.array.isRequired,
   },
 
   getInitialState() {
+    // The default stream could not be present in a system. In that case we fallback to the first available stream.
+    this.defaultStream = this.props.streams.find(s => s.id === DEFAULT_STREAM_ID) || this.props.streams[0];
+
     return {
       message: undefined,
-      stream: this.props.streams.find(s => s.id.toLowerCase() === 'default'),
+      stream: this.defaultStream,
       simulation: undefined,
       loading: false,
       error: undefined,
@@ -79,7 +84,7 @@ const ProcessorSimulator = React.createClass({
 
     const streamHelp = (
       <span>
-        Select a stream to use during simulation, the <em>Default</em> stream is used by default.
+        Select a stream to use during simulation, the <em>{this.defaultStream.title}</em> stream is used by default.
       </span>
     );
 
