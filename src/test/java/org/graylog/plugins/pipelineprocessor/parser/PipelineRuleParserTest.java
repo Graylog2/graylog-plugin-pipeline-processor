@@ -61,6 +61,7 @@ import java.util.Optional;
 import static com.google.common.collect.ImmutableList.of;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -503,6 +504,14 @@ public class PipelineRuleParserTest extends BaseParserTest {
             assertEquals("Unable to pre-compute value for 1st argument timezone in call to function now_in_tz: The datetime zone id '123' is not recognised", parseError.toString());
             assertEquals(InvalidFunctionArgument.class, parseError.getClass());
         }
+    }
+
+    @Test
+    public void booleanNot() {
+        final Rule rule = parser.parseRule(ruleForTest(), false);
+        evaluateRule(rule);
+
+        assertFalse(actionsTriggered.get());
     }
 
     public static class CustomObject {
