@@ -16,12 +16,14 @@
  */
 package org.graylog.plugins.pipelineprocessor.functions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.net.InetAddresses;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.graylog.plugins.pipelineprocessor.BaseParserTest;
 import org.graylog.plugins.pipelineprocessor.EvaluationContext;
 import org.graylog.plugins.pipelineprocessor.ast.Rule;
@@ -34,6 +36,15 @@ import org.graylog.plugins.pipelineprocessor.functions.dates.FlexParseDate;
 import org.graylog.plugins.pipelineprocessor.functions.dates.FormatDate;
 import org.graylog.plugins.pipelineprocessor.functions.dates.Now;
 import org.graylog.plugins.pipelineprocessor.functions.dates.ParseDate;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.Days;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.Hours;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.Millis;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.Minutes;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.Months;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.PeriodParseFunction;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.Seconds;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.Weeks;
+import org.graylog.plugins.pipelineprocessor.functions.dates.periods.Years;
 import org.graylog.plugins.pipelineprocessor.functions.hashing.CRC32;
 import org.graylog.plugins.pipelineprocessor.functions.hashing.CRC32C;
 import org.graylog.plugins.pipelineprocessor.functions.hashing.MD5;
@@ -85,6 +96,7 @@ import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.graylog2.streams.StreamService;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
+import org.joda.time.Duration;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -160,6 +172,16 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         functions.put(FlexParseDate.NAME, new FlexParseDate());
         functions.put(ParseDate.NAME, new ParseDate());
         functions.put(FormatDate.NAME, new FormatDate());
+
+        functions.put(Years.NAME, new Years());
+        functions.put(Months.NAME, new Months());
+        functions.put(Weeks.NAME, new Weeks());
+        functions.put(Days.NAME, new Days());
+        functions.put(Hours.NAME, new Hours());
+        functions.put(Minutes.NAME, new Minutes());
+        functions.put(Seconds.NAME, new Seconds());
+        functions.put(Millis.NAME, new Millis());
+        functions.put(PeriodParseFunction.NAME, new PeriodParseFunction());
 
         functions.put(CRC32.NAME, new CRC32());
         functions.put(CRC32C.NAME, new CRC32C());
@@ -572,6 +594,24 @@ public class FunctionsSnippetsTest extends BaseParserTest {
             evaluateRule(rule);
 
             assertThat(actionsTriggered.get()).isTrue();
+        } finally {
+            DateTimeUtils.setCurrentMillisSystem();
+        }
+    }
+
+    @Test
+    public void dateArithmetic() {
+        final InstantMillisProvider clock = new InstantMillisProvider(GRAYLOG_EPOCH);
+        DateTimeUtils.setCurrentMillisProvider(clock);
+        try {
+            final Rule rule = parser.parseRule(ruleForTest(), true);
+            final Message message = evaluateRule(rule);
+
+            assertThat(actionsTriggered.get()).isTrue();
+            assertThat(message).isNotNull();
+            assertThat(message.getField("interval"))
+                    .isInstanceOf(Duration.class)
+                    .matches(o -> ((Duration)o).isEqual(Duration.standardDays(1)), "Exactly one day difference");
         } finally {
             DateTimeUtils.setCurrentMillisSystem();
         }
