@@ -89,7 +89,7 @@ public class ConfigurationStateUpdater {
     }
 
     public static void setAllowCodeGeneration(Boolean allowCodeGeneration) {
-        if (ToolProvider.getSystemJavaCompiler() == null) {
+        if (allowCodeGeneration && ToolProvider.getSystemJavaCompiler() == null) {
             log.warn("Your Java runtime does not have a compiler available, turning off dynamic " +
                     "code generation. Please consider running Graylog in a JDK, not a JRE, to " +
                     "avoid a performance penalty in pipeline processing.");
