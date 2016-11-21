@@ -95,7 +95,7 @@ public class CodeGenerator {
             return (Class<GeneratedRule>) CompilerUtils.CACHED_COMPILER.loadFromJava(ruleClassloader, "org.graylog.plugins.pipelineprocessor.$dynamic.rules.rule$" + rule.id() , sourceCode);
         } catch (ClassNotFoundException e) {
             log.error("Unable to compile code\n{}", sourceCode);
-            throw new RuntimeException(e);
+            return null;
         }
 
     }
