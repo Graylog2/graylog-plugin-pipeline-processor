@@ -406,7 +406,6 @@ public class CodeGenerator {
             final CodeBlock leftBlock = codeSnippet.get(expr.left());
             final CodeBlock rightBlock = codeSnippet.get(expr.right());
 
-            // TODO optimize operator selection, Objects.equals isn't the ideal candidate because of auto-boxing
             final Class leftType = expr.left().getType();
             final Class rightType = expr.right().getType();
             boolean useOperator = false;
