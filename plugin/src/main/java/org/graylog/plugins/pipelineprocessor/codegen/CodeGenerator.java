@@ -124,6 +124,7 @@ public class CodeGenerator {
         private MethodSpec.Builder constructorBuilder;
         private CodeBlock.Builder lateConstructorBlock;
         private CodeBlock.Builder hoistedConstantExpressions;
+        private CodeBlock.Builder pureConstantFunctionInvocations;
         private Set<CodeBlock> functionReferences = Sets.newHashSet();
 
         public String getSource() {
@@ -152,6 +153,7 @@ public class CodeGenerator {
                     .addParameter(FunctionRegistry.class, "functionRegistry");
             lateConstructorBlock = CodeBlock.builder();
             hoistedConstantExpressions = CodeBlock.builder();
+            pureConstantFunctionInvocations = CodeBlock.builder();
         }
 
         @Override
@@ -172,7 +174,8 @@ public class CodeGenerator {
             // all the expressions/statements that are constant at compile time
             constructorBuilder.addStatement("// constant expressions");
             constructorBuilder.addCode(hoistedConstantExpressions.build());
-
+            constructorBuilder.addStatement("// pure functions with completely constant arguments");
+            constructorBuilder.addCode(pureConstantFunctionInvocations.build());
 
             classFile.addMethod(constructorBuilder.build());
 
@@ -285,10 +288,13 @@ public class CodeGenerator {
             // evaluate all the parameters (the parser made sure all required fields are given)
             final FunctionArgs args = expr.getArgs();
             final CodeBlock.Builder argAssignment = CodeBlock.builder();
+            final boolean[] allArgsConstant = {true};
             args.getArgs().forEach((name, argExpr) -> {
                 final Object varRef = blockOrMissing(codeSnippet.get(argExpr), argExpr);
                 // hoist constant argument evaluation
-                CodeBlock.Builder target = argExpr.isConstant() ? hoistedConstantExpressions : argAssignment;
+                final boolean argConstant = argExpr.isConstant();
+                allArgsConstant[0] &= argConstant;
+                CodeBlock.Builder target = argConstant ? hoistedConstantExpressions : argAssignment;
                 target.addStatement("$L.setAndTransform$$$L($L)",
                         mangledFuncArgsHolder,
                         name,
@@ -303,7 +309,15 @@ public class CodeGenerator {
             if (Void.class.equals(function.returnType())) {
                 currentMethod.addStatement("$L", functionInvocation);
             } else {
-                currentMethod.addStatement("$T $L = $L", ClassName.get(function.returnType()), functionValueVarName, functionInvocation);
+                if (function.pure() && allArgsConstant[0]) {
+                    currentMethod.addStatement("// function $L pure and args constant: invocation hoisted", functionValueVarName);
+                    hoistedExpressionMembers.add(FieldSpec.builder(ClassName.get(function.returnType()), functionValueVarName, Modifier.PRIVATE, Modifier.FINAL).build());
+                    // we need to use a dummy context
+                    CodeBlock pureFunctionInvocation = CodeBlock.of("$L.evaluate($L, $T.emptyContext())", mangledFunctionName, mangledFuncArgsHolder, EvaluationContext.class);
+                    pureConstantFunctionInvocations.addStatement("$L = $L", functionValueVarName, pureFunctionInvocation);
+                } else {
+                    currentMethod.addStatement("$T $L = $L", ClassName.get(function.returnType()), functionValueVarName, functionInvocation);
+                }
             }
             // create a field/initializer block for the function reference
             functionMembers.add(
