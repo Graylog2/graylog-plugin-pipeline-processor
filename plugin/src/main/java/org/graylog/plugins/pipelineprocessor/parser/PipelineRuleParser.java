@@ -77,6 +77,7 @@ import org.graylog.plugins.pipelineprocessor.parser.errors.IncompatibleIndexType
 import org.graylog.plugins.pipelineprocessor.parser.errors.IncompatibleType;
 import org.graylog.plugins.pipelineprocessor.parser.errors.IncompatibleTypes;
 import org.graylog.plugins.pipelineprocessor.parser.errors.InvalidFunctionArgument;
+import org.graylog.plugins.pipelineprocessor.parser.errors.InvalidOperation;
 import org.graylog.plugins.pipelineprocessor.parser.errors.MissingRequiredParam;
 import org.graylog.plugins.pipelineprocessor.parser.errors.NonIndexableType;
 import org.graylog.plugins.pipelineprocessor.parser.errors.OptionalParametersMustBeNamed;
@@ -751,16 +752,21 @@ public class PipelineRuleParser {
 
         @Override
         public void exitAddition(RuleLangParser.AdditionContext ctx) {
-            final BinaryExpression binaryExpr = (BinaryExpression) parseContext.expressions().get(ctx);
-            final Class leftType = binaryExpr.left().getType();
-            final Class rightType = binaryExpr.right().getType();
+            final AdditionExpression addExpression = (AdditionExpression) parseContext.expressions().get(ctx);
+            final Class leftType = addExpression.left().getType();
+            final Class rightType = addExpression.right().getType();
 
             // special case for DateTime/Period, which are all compatible
             final boolean leftDate = DateTime.class.equals(leftType);
             final boolean rightDate = DateTime.class.equals(rightType);
             final boolean leftPeriod = Period.class.equals(leftType);
             final boolean rightPeriod = Period.class.equals(rightType);
-            if (leftDate && rightDate || leftDate && rightPeriod || leftPeriod && rightDate || leftPeriod && rightPeriod) {
+            if (leftDate && rightDate) {
+                if (addExpression.isPlus()) {
+                    parseContext.addError(new InvalidOperation(ctx, addExpression, "Unable to add two dates"));
+                }
+                return;
+            } else if (leftDate && rightPeriod || leftPeriod && rightDate || leftPeriod && rightPeriod) {
                 return;
             }
             // otherwise check generic binary expression
