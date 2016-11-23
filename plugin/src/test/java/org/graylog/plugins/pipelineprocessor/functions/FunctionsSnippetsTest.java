@@ -97,6 +97,7 @@ import org.graylog2.streams.StreamService;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
 import org.joda.time.Duration;
+import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -612,6 +613,18 @@ public class FunctionsSnippetsTest extends BaseParserTest {
             assertThat(message.getField("interval"))
                     .isInstanceOf(Duration.class)
                     .matches(o -> ((Duration)o).isEqual(Duration.standardDays(1)), "Exactly one day difference");
+            assertThat(message.getField("years")).isEqualTo(Period.years(2));
+            assertThat(message.getField("months")).isEqualTo(Period.months(2));
+            assertThat(message.getField("weeks")).isEqualTo(Period.weeks(2));
+            assertThat(message.getField("days")).isEqualTo(Period.days(2));
+            assertThat(message.getField("hours")).isEqualTo(Period.hours(2));
+            assertThat(message.getField("minutes")).isEqualTo(Period.minutes(2));
+            assertThat(message.getField("seconds")).isEqualTo(Period.seconds(2));
+            assertThat(message.getField("millis")).isEqualTo(Period.millis(2));
+            assertThat(message.getField("period")).isEqualTo(Period.parse("P1YT1M"));
+
+
+            assertThat(message.getFieldAs(DateTime.class, "long_time_ago")).matches(date -> date.plus(Period.years(10000)).equals(GRAYLOG_EPOCH));
         } finally {
             DateTimeUtils.setCurrentMillisSystem();
         }
