@@ -86,6 +86,8 @@ public class ConfigurationStateUpdater {
 
         // listens to cluster wide Rule, Pipeline and pipeline stream connection changes
         serverEventBus.register(this);
+
+        reloadAndSave();
     }
 
     private static void setAllowCodeGeneration(Boolean allowCodeGeneration) {
