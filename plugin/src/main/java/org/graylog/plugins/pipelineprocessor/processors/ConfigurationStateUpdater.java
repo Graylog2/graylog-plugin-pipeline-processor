@@ -82,7 +82,7 @@ public class ConfigurationStateUpdater {
         this.serverEventBus = serverEventBus;
         this.stateFactory = stateFactory;
         // ignore global config, never allow generating code
-        setAllowCodeGeneration(false);
+        setAllowCodeGeneration(allowCodeGeneration);
 
         // listens to cluster wide Rule, Pipeline and pipeline stream connection changes
         serverEventBus.register(this);
@@ -90,7 +90,7 @@ public class ConfigurationStateUpdater {
         reloadAndSave();
     }
 
-    private static void setAllowCodeGeneration(Boolean allowCodeGeneration) {
+    public static void setAllowCodeGeneration(Boolean allowCodeGeneration) {
         if (allowCodeGeneration && ToolProvider.getSystemJavaCompiler() == null) {
             log.warn("Your Java runtime does not have a compiler available, turning off dynamic " +
                     "code generation. Please consider running Graylog in a JDK, not a JRE, to " +
