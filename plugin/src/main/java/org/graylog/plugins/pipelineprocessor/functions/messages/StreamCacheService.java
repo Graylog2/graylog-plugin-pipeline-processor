@@ -17,12 +17,12 @@
 package org.graylog.plugins.pipelineprocessor.functions.messages;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.SortedSetMultimap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.AbstractIdleService;
@@ -34,8 +34,9 @@ import org.graylog2.streams.events.StreamsChangedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +52,10 @@ public class StreamCacheService extends AbstractIdleService {
     private final StreamService streamService;
     private ScheduledExecutorService executorService;
 
-    private Multimap<String, Stream> nameToStream = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
+    private SortedSetMultimap<String, Stream> nameToStream = Multimaps.synchronizedSortedSetMultimap(
+            MultimapBuilder.hashKeys()
+                    .treeSetValues(Comparator.comparing(Stream::getId))
+                    .build());
     private Map<String, Stream> idToStream = Maps.newConcurrentMap();
 
     @Inject
@@ -73,6 +77,7 @@ public class StreamCacheService extends AbstractIdleService {
     protected void shutDown() throws Exception {
         eventBus.unregister(this);
     }
+
     @Subscribe
     public void handleStreamUpdate(StreamsChangedEvent event) {
         executorService.schedule(() -> updateStreams(event.streamIds()), 0, TimeUnit.SECONDS);
@@ -81,7 +86,7 @@ public class StreamCacheService extends AbstractIdleService {
     @VisibleForTesting
     public void updateStreams(ImmutableSet<String> ids) {
         for (String id : ids) {
-            LOG.info("Updating id and title cache for stream id {}", id);
+            LOG.debug("Updating stream id/title cache for id {}", id);
             try {
                 final Stream stream = streamService.load(id);
                 if (stream.getDisabled()) {
@@ -98,25 +103,23 @@ public class StreamCacheService extends AbstractIdleService {
 
     private void purgeCache(String id) {
         final Stream stream = idToStream.remove(id);
-        LOG.info("Purging stream id/title cache for id {}, stream {}", id, stream);
+        LOG.debug("Purging stream id/title cache for id {}, stream {}", id, stream);
         if (stream != null) {
             nameToStream.remove(stream.getTitle(), stream);
         }
     }
 
     private void updateCache(Stream stream) {
-        LOG.info("Updating stream id/title cache for {}/'{}'", stream.getId(), stream.getTitle());
+        LOG.debug("Updating stream id/title cache for {}/'{}'", stream.getId(), stream.getTitle());
         idToStream.put(stream.getId(), stream);
         nameToStream.put(stream.getTitle(), stream);
-        final Collection<Stream> streams = nameToStream.get(stream.getTitle());
+        final SortedSet<Stream> streams = nameToStream.get(stream.getTitle());
         if (streams.size() > 1) {
-            final Stream first = Iterables.getFirst(streams, stream);
-            if (first != null) {
-                LOG.warn("There are multiple streams with the same title in the system. " +
-                                "Please use Stream IDs instead of titles for these streams to " +
-                                "consistently route messages. Returning stream '{}' ({}).",
-                        first.getTitle(), first.getId());
-            }
+            final Stream first = streams.first();
+            LOG.warn("There are multiple streams with the same title in the system. " +
+                            "Please use Stream IDs instead of titles for these streams to " +
+                            "consistently route messages. Returning stream '{}' for title '{}'.",
+                    first.getId(), first.getTitle());
         }
     }
 

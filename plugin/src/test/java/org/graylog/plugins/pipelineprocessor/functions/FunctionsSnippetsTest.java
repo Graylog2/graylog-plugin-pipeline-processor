@@ -688,7 +688,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat(message.getStreams()).isNotEmpty();
         assertThat(message.getStreams().size()).isEqualTo(1);
         final Stream stream = Iterables.getOnlyElement(message.getStreams());
-        assertThat(stream.getId()).isEqualTo("id2");
+        assertThat(stream.getId()).isEqualTo("id");
 
         streamCacheService.updateStreams(ImmutableSet.of("id"));
 
