@@ -16,28 +16,28 @@
  */
 package org.graylog.plugins.pipelineprocessor.functions.messages;
 
+import com.google.common.collect.ImmutableList;
 import org.graylog.plugins.pipelineprocessor.EvaluationContext;
 import org.graylog.plugins.pipelineprocessor.ast.functions.AbstractFunction;
 import org.graylog.plugins.pipelineprocessor.ast.functions.FunctionArgs;
 import org.graylog.plugins.pipelineprocessor.ast.functions.FunctionDescriptor;
 import org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor;
 import org.graylog2.plugin.Message;
-import org.graylog2.plugin.Tools;
-import org.joda.time.DateTime;
 
-import java.util.Optional;
-
-import static com.google.common.collect.ImmutableList.of;
-import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.string;
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.type;
 
 public class CloneMessage extends AbstractFunction<Message> {
-
     public static final String NAME = "clone_message";
+
+    private final ParameterDescriptor<Message, Message> messageParam;
+
+    public CloneMessage() {
+        messageParam = type("message", Message.class).optional().description("The message to use, defaults to '$message'").build();
+    }
 
     @Override
     public Message evaluate(FunctionArgs args, EvaluationContext context) {
-        final Message currentMessage = context.currentMessage();
+        final Message currentMessage = messageParam.optional(args, context).orElse(context.currentMessage());
         final Message clonedMessage = new Message(currentMessage.getMessage(), currentMessage.getSource(), currentMessage.getTimestamp());
         clonedMessage.addFields(currentMessage.getFields());
         clonedMessage.addStreams(currentMessage.getStreams());
@@ -51,9 +51,9 @@ public class CloneMessage extends AbstractFunction<Message> {
     public FunctionDescriptor<Message> descriptor() {
         return FunctionDescriptor.<Message>builder()
                 .name(NAME)
-                .params(new ParameterDescriptor[0])
+                .params(ImmutableList.of(messageParam))
                 .returnType(Message.class)
-                .description("Clones the current message")
+                .description("Clones a message")
                 .build();
     }
 }

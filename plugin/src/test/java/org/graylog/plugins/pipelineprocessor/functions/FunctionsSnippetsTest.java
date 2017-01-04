@@ -423,9 +423,11 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         final EvaluationContext context = contextForRuleEval(rule, message);
 
         final Message origMessage = context.currentMessage();
-        final Message clonedMessage = Iterables.getOnlyElement(context.createdMessages());
+        final Message clonedMessage = Iterables.get(context.createdMessages(), 0);
+        final Message otherMessage = Iterables.get(context.createdMessages(), 1);
 
         assertThat(origMessage).isNotSameAs(clonedMessage);
+        assertThat(clonedMessage).isNotNull();
         assertThat(clonedMessage.getMessage()).isEqualTo(origMessage.getMessage());
         assertThat(clonedMessage.getSource()).isEqualTo(origMessage.getSource());
         assertThat(clonedMessage.getTimestamp()).isEqualTo(origMessage.getTimestamp());
@@ -435,7 +437,9 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat(clonedMessage.getFieldAs(String.class, "only_in")).isEqualTo("new message");
         assertThat(clonedMessage.getFieldAs(String.class, "multi")).isEqualTo("new message");
         assertThat(clonedMessage.getFieldAs(String.class, "foo")).isEqualTo("bar");
-
+        assertThat(otherMessage).isNotNull();
+        assertThat(otherMessage.getMessage()).isEqualTo("foo");
+        assertThat(otherMessage.getSource()).isEqualTo("source");
     }
 
     @Test

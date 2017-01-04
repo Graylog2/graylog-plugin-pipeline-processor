@@ -2,6 +2,8 @@ rule "operate on cloned message"
 when true
 then
   let x = clone_message();
+  let new = create_message("foo", "source");
+  let cloned = clone_message(new);
 
   set_field(field: "removed_again", value: "foo", message: x);
   set_field(field: "only_in", value: "new message", message: x);
