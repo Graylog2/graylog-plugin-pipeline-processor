@@ -17,7 +17,6 @@
 package org.graylog.plugins.pipelineprocessor.functions.messages;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MultimapBuilder;
@@ -34,12 +33,14 @@ import org.graylog2.streams.events.StreamsChangedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -50,13 +51,13 @@ public class StreamCacheService extends AbstractIdleService {
 
     private final EventBus eventBus;
     private final StreamService streamService;
-    private ScheduledExecutorService executorService;
+    private final ScheduledExecutorService executorService;
 
-    private SortedSetMultimap<String, Stream> nameToStream = Multimaps.synchronizedSortedSetMultimap(
+    private final SortedSetMultimap<String, Stream> nameToStream = Multimaps.synchronizedSortedSetMultimap(
             MultimapBuilder.hashKeys()
                     .treeSetValues(Comparator.comparing(Stream::getId))
                     .build());
-    private Map<String, Stream> idToStream = Maps.newConcurrentMap();
+    private final Map<String, Stream> idToStream = Maps.newConcurrentMap();
 
     @Inject
     public StreamCacheService(EventBus eventBus,
@@ -84,7 +85,7 @@ public class StreamCacheService extends AbstractIdleService {
     }
 
     @VisibleForTesting
-    public void updateStreams(ImmutableSet<String> ids) {
+    public void updateStreams(Collection<String> ids) {
         for (String id : ids) {
             LOG.debug("Updating stream id/title cache for id {}", id);
             try {
@@ -124,10 +125,12 @@ public class StreamCacheService extends AbstractIdleService {
     }
 
 
+    @Nullable
     public Stream getByName(String name) {
         return Iterables.getFirst(nameToStream.get(name), null);
     }
 
+    @Nullable
     public Stream getById(String id) {
         return idToStream.get(id);
     }
