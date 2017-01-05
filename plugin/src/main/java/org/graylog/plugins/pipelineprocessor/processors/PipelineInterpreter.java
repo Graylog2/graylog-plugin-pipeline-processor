@@ -95,11 +95,10 @@ public class PipelineInterpreter implements MessageProcessor {
      */
     @Override
     public Messages process(Messages messages) {
-        final Timer.Context context = executionTime.time();
-        final State latestState = stateUpdater.getLatestState();
-        final Messages process = process(messages, new NoopInterpreterListener(), latestState);
-        context.stop();
-        return process;
+        try (Timer.Context ignored = executionTime.time()) {
+            final State latestState = stateUpdater.getLatestState();
+            return process(messages, new NoopInterpreterListener(), latestState);
+        }
     }
 
     /**
