@@ -686,16 +686,12 @@ public class FunctionsSnippetsTest extends BaseParserTest {
 
         assertThat(message).isNotNull();
         assertThat(message.getStreams()).isNotEmpty();
-        assertThat(message.getStreams().size()).isEqualTo(1);
-        final Stream stream = Iterables.getOnlyElement(message.getStreams());
-        assertThat(stream.getId()).isEqualTo("id");
+        assertThat(message.getStreams().size()).isEqualTo(2);
 
         streamCacheService.updateStreams(ImmutableSet.of("id"));
 
         final Message message2 = evaluateRule(rule);
         assertThat(message2).isNotNull();
-        assertThat(message2.getStreams().size()).isEqualTo(1);
-        final Stream stream2 = Iterables.getOnlyElement(message2.getStreams());
-        assertThat(stream2.getId()).isEqualTo("id");
+        assertThat(message2.getStreams().size()).isEqualTo(2);
     }
 }

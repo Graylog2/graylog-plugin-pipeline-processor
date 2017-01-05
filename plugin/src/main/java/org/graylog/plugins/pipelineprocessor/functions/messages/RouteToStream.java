@@ -26,6 +26,9 @@ import org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.streams.Stream;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import static com.google.common.collect.ImmutableList.of;
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.string;
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.type;
@@ -53,27 +56,30 @@ public class RouteToStream extends AbstractFunction<Void> {
     public Void evaluate(FunctionArgs args, EvaluationContext context) {
         String id = idParam.optional(args, context).orElse("");
 
-        final Stream stream;
+        final Collection<Stream> streams;
         if ("".equals(id)) {
             final String name = nameParam.optional(args, context).orElse("");
             if ("".equals(name)) {
                 return null;
             }
-            stream = streamCacheService.getByName(name);
-            if (stream == null) {
+            streams = streamCacheService.getByName(name);
+            if (streams.isEmpty()) {
                 // TODO signal error somehow
                 return null;
             }
         } else {
-            stream = streamCacheService.getById(id);
+            final Stream stream = streamCacheService.getById(id);
             if (stream == null) {
                 return null;
             }
+            streams = Collections.singleton(stream);
         }
-        if (!stream.isPaused()) {
-            final Message message = messageParam.optional(args, context).orElse(context.currentMessage());
-            message.addStream(stream);
-        }
+        final Message message = messageParam.optional(args, context).orElse(context.currentMessage());
+        streams.forEach(stream -> {
+            if (!stream.isPaused()) {
+                message.addStream(stream);
+            }
+        });
         return null;
     }
 

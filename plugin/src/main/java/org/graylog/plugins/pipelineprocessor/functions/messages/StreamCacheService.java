@@ -17,7 +17,6 @@
 package org.graylog.plugins.pipelineprocessor.functions.messages;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
@@ -36,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -114,20 +112,11 @@ public class StreamCacheService extends AbstractIdleService {
         LOG.debug("Updating stream id/title cache for {}/'{}'", stream.getId(), stream.getTitle());
         idToStream.put(stream.getId(), stream);
         nameToStream.put(stream.getTitle(), stream);
-        final SortedSet<Stream> streams = nameToStream.get(stream.getTitle());
-        if (streams.size() > 1) {
-            final Stream first = streams.first();
-            LOG.warn("There are multiple streams with the same title in the system. " +
-                            "Please use Stream IDs instead of titles for these streams to " +
-                            "consistently route messages. Returning stream '{}' for title '{}'.",
-                    first.getId(), first.getTitle());
-        }
     }
 
 
-    @Nullable
-    public Stream getByName(String name) {
-        return Iterables.getFirst(nameToStream.get(name), null);
+    public Collection<Stream> getByName(String name) {
+        return nameToStream.get(name);
     }
 
     @Nullable
