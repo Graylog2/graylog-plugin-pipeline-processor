@@ -1,18 +1,22 @@
 package org.graylog.plugins.pipelineprocessor.functions.lookup;
 
 import com.google.inject.Inject;
-
+import com.google.inject.TypeLiteral;
 import org.graylog.plugins.pipelineprocessor.EvaluationContext;
 import org.graylog.plugins.pipelineprocessor.ast.functions.AbstractFunction;
 import org.graylog.plugins.pipelineprocessor.ast.functions.FunctionArgs;
 import org.graylog.plugins.pipelineprocessor.ast.functions.FunctionDescriptor;
 import org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor;
 import org.graylog2.lookup.LookupTableService;
+import org.graylog2.plugin.lookup.LookupResult;
+
+import java.util.Collections;
+import java.util.Map;
 
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.object;
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.string;
 
-public class Lookup extends AbstractFunction<Object> {
+public class Lookup extends AbstractFunction<Map<Object, Object>> {
 
     public static final String NAME = "lookup";
 
@@ -30,29 +34,30 @@ public class Lookup extends AbstractFunction<Object> {
     }
 
     @Override
-    public Object evaluate(FunctionArgs args, EvaluationContext context) {
+    public Map<Object, Object> evaluate(FunctionArgs args, EvaluationContext context) {
         Object key = keyParam.required(args, context);
         if (key == null) {
-            return defaultParam.optional(args, context);
+            return Collections.singletonMap(key, defaultParam.optional(args, context));
         }
         LookupTableService.Function table = lookupTableParam.required(args, context);
         if (table == null) {
-            return defaultParam.optional(args, context);
+            return Collections.singletonMap(key, defaultParam.optional(args, context));
         }
-        Object value = table.lookup(key);
-        if (value == null) {
-            return defaultParam.optional(args, context);
+        LookupResult result = table.lookup(key);
+        if (result == null || result.isEmpty()) {
+            return Collections.singletonMap(key, defaultParam.optional(args, context));
         }
-        return value;
+        return result.asMap();
     }
 
     @Override
-    public FunctionDescriptor<Object> descriptor() {
-        return FunctionDescriptor.builder()
+    public FunctionDescriptor<Map<Object, Object>> descriptor() {
+        //noinspection unchecked
+        return FunctionDescriptor.<Map<Object, Object>>builder()
                 .name(NAME)
                 .description("Looks a value up in the named lookup table.")
                 .params(lookupTableParam, keyParam)
-                .returnType(Object.class)
+                .returnType((Class<? extends Map<Object, Object>>) new TypeLiteral<Map<Object, Object>>() {}.getRawType())
                 .build();
     }
 }
