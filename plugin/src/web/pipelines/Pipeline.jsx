@@ -87,10 +87,6 @@ const Pipeline = React.createClass({
         <Row className="row-sm row-margin-top">
           <Col md={12}>
             <div className="pull-right">
-              <LinkContainer to={Routes.pluginRoute('SYSTEM_PIPELINES_SIMULATE')}>
-                <Button bsStyle="info">Simulate processing</Button>
-              </LinkContainer>
-              &nbsp;
               <PipelineConnectionsForm pipeline={pipeline} connections={this.props.connections}
                                        streams={this.props.streams} save={this.props.onConnectionsChange} />
             </div>
