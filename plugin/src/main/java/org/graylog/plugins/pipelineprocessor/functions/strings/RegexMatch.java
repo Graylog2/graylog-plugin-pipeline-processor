@@ -77,7 +77,7 @@ public class RegexMatch extends AbstractFunction<RegexMatch.RegexMatchResult> {
 	 * At the same time there's an additional <code>matches</code> bean property to quickly check whether the regex has matched at all.
 	 */
 	public static class RegexMatchResult extends ForwardingMap<String, String> {
-		private final boolean matches;
+		private boolean matches;
 		private final ImmutableMap<String, String> groups;
 
 		public RegexMatchResult(Matcher matcher, List<String> groupNames) {
