@@ -23,6 +23,8 @@ import org.graylog.plugins.pipelineprocessor.ast.functions.FunctionArgs;
 import org.graylog.plugins.pipelineprocessor.ast.functions.FunctionDescriptor;
 import org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor;
 import org.graylog2.plugin.Message;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.type;
 
@@ -38,8 +40,22 @@ public class CloneMessage extends AbstractFunction<Message> {
     @Override
     public Message evaluate(FunctionArgs args, EvaluationContext context) {
         final Message currentMessage = messageParam.optional(args, context).orElse(context.currentMessage());
-        final Message clonedMessage = new Message(currentMessage.getMessage(), currentMessage.getSource(), currentMessage.getTimestamp());
-        clonedMessage.addFields(currentMessage.getFields());
+
+        final Object tsField = currentMessage.getField(Message.FIELD_TIMESTAMP);
+        final Message clonedMessage;
+        if (tsField instanceof DateTime) {
+            clonedMessage = new Message(currentMessage.getMessage(), currentMessage.getSource(), currentMessage.getTimestamp());
+            clonedMessage.addFields(currentMessage.getFields());
+        } else {
+            final DateTime now = DateTime.now(DateTimeZone.UTC);
+            clonedMessage = new Message(currentMessage.getMessage(), currentMessage.getSource(), now);
+            clonedMessage.addFields(currentMessage.getFields());
+
+            // Message#addFields() overwrites the "timestamp" field.
+            clonedMessage.addField("timestamp", now);
+            clonedMessage.addField("_original_timestamp", tsField);
+        }
+
         clonedMessage.addStreams(currentMessage.getStreams());
 
         // register in context so the processor can inject it later on
