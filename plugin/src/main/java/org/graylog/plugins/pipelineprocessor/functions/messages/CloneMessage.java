@@ -25,10 +25,14 @@ import org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor;
 import org.graylog2.plugin.Message;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.type;
 
 public class CloneMessage extends AbstractFunction<Message> {
+    private static final Logger LOG = LoggerFactory.getLogger(CloneMessage.class);
+
     public static final String NAME = "clone_message";
 
     private final ParameterDescriptor<Message, Message> messageParam;
@@ -47,6 +51,9 @@ public class CloneMessage extends AbstractFunction<Message> {
             clonedMessage = new Message(currentMessage.getMessage(), currentMessage.getSource(), currentMessage.getTimestamp());
             clonedMessage.addFields(currentMessage.getFields());
         } else {
+            LOG.warn("Invalid timestamp <{}> (type: {}) in message <{}>. Using current time instead.",
+                    tsField, tsField.getClass().getCanonicalName(), currentMessage.getId());
+
             final DateTime now = DateTime.now(DateTimeZone.UTC);
             clonedMessage = new Message(currentMessage.getMessage(), currentMessage.getSource(), now);
             clonedMessage.addFields(currentMessage.getFields());
