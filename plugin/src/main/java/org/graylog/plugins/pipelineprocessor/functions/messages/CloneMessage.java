@@ -53,7 +53,7 @@ public class CloneMessage extends AbstractFunction<Message> {
 
             // Message#addFields() overwrites the "timestamp" field.
             clonedMessage.addField("timestamp", now);
-            clonedMessage.addField("_original_timestamp", tsField);
+            clonedMessage.addField("_original_timestamp", String.valueOf(tsField));
         }
 
         clonedMessage.addStreams(currentMessage.getStreams());
