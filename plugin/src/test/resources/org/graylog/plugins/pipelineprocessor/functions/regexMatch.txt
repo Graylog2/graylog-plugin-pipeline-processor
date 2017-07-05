@@ -3,11 +3,20 @@ when
     regex("^.*(cde\\.)(:(\\d+))?.*$", "abcde.fg").matches == true &&
     regex(".*(cde\\.)(:(\\d+))?.*", "abcde.fg").matches == true &&
     regex("(cde\\.)(:(\\d+))?", "abcde.fg").matches == true &&
-    regex("^(cde\\.)(:(\\d+))?$", "abcde.fg").matches == false
+    regex("^(cde\\.)(:(\\d+))?$", "abcde.fg").matches == false &&
+    regex("(abc)", "abcabcabcabc").matches == true
 then
     let result = regex("(cd\\.e)", "abcd.efg");
     set_field("group_1", result["0"]);
+
+    let result = regex("(abc)", "abcabc");
+    set_field("group_2a", result["0"]);
+    set_field("group_2b", result["1"]);
+
     let result = regex("(cd\\.e)", "abcd.efg", ["name"]);
     set_field("named_group", result["name"]);
     set_field("matched_regex", result.matches);
+
+    let result = regex("(abc)", "abcabc", ["named_abc1", "named_abc2"]);
+    set_fields(result);
 end
