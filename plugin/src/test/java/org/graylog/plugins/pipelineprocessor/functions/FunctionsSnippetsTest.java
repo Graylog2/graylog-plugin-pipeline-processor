@@ -59,6 +59,7 @@ import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddressConversion;
 import org.graylog.plugins.pipelineprocessor.functions.json.JsonParse;
 import org.graylog.plugins.pipelineprocessor.functions.json.SelectJsonPath;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListAdd;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListAddAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListContains;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListContainsAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListIndexOf;
@@ -244,6 +245,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         functions.put(SyslogLevelConversion.NAME, new SyslogLevelConversion());
 
         functions.put(ListAdd.NAME, new ListAdd());
+        functions.put(ListAddAll.NAME, new ListAddAll());
         functions.put(ListContains.NAME, new ListContains());
         functions.put(ListContainsAll.NAME, new ListContainsAll());
         functions.put(ListIndexOf.NAME, new ListIndexOf());
