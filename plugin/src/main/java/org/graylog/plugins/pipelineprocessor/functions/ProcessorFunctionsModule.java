@@ -53,6 +53,7 @@ import org.graylog.plugins.pipelineprocessor.functions.ips.CidrMatch;
 import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddressConversion;
 import org.graylog.plugins.pipelineprocessor.functions.json.JsonParse;
 import org.graylog.plugins.pipelineprocessor.functions.json.SelectJsonPath;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListAdd;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListContains;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListContainsAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListIndexOf;
@@ -141,6 +142,7 @@ public class ProcessorFunctionsModule extends PluginModule {
         addMessageProcessorFunction(Split.NAME, Split.class);
 
         // list functions
+        addMessageProcessorFunction(ListAdd.NAME, ListAdd.class);
         addMessageProcessorFunction(ListContains.NAME, ListContains.class);
         addMessageProcessorFunction(ListContainsAll.NAME, ListContainsAll.class);
         addMessageProcessorFunction(ListIndexOf.NAME, ListIndexOf.class);

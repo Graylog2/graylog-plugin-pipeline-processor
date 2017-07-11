@@ -1,5 +1,8 @@
 rule "list tests"
 when
+    list_add([], "foo") == ["foo"] &&
+    list_add(["foo", "bar"], "baz") == ["foo", "bar", "baz"] &&
+    list_add(["foo"], 1) == ["foo", 1] &&
     list_contains(["foo", "bar"], "foo") &&
     list_contains([1, 2, 3], 2) &&
     list_contains([true, false], true) &&
