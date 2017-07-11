@@ -6,6 +6,8 @@ when
     list_contains(["foo", 23, false], 23) &&
     !list_contains(["foo"], 23) &&
     !list_contains([], 23) &&
+    list_is_empty([]) &&
+    !list_is_empty(["foo"]) &&
     list_reverse([]) == [] &&
     list_reverse([1, 2, 3]) == [3, 2, 1] &&
     list_reverse(["foo", "bar", "baz"]) == ["baz", "bar", "foo"] &&

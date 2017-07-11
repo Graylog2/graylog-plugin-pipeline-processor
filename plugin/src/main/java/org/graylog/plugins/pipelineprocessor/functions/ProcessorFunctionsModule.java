@@ -54,6 +54,7 @@ import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddressConversion;
 import org.graylog.plugins.pipelineprocessor.functions.json.JsonParse;
 import org.graylog.plugins.pipelineprocessor.functions.json.SelectJsonPath;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListContains;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListIsEmpty;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListReverse;
 import org.graylog.plugins.pipelineprocessor.functions.lookup.Lookup;
 import org.graylog.plugins.pipelineprocessor.functions.lookup.LookupValue;
@@ -132,6 +133,7 @@ public class ProcessorFunctionsModule extends PluginModule {
 
         // list functions
         addMessageProcessorFunction(ListContains.NAME, ListContains.class);
+        addMessageProcessorFunction(ListIsEmpty.NAME, ListIsEmpty.class);
         addMessageProcessorFunction(ListReverse.NAME, ListReverse.class);
 
         // json
