@@ -5,7 +5,12 @@ when
     list_contains([true, false], true) &&
     list_contains(["foo", 23, false], 23) &&
     !list_contains(["foo"], 23) &&
-    !list_contains([], 23)
+    !list_contains([], 23) &&
+    list_reverse([]) == [] &&
+    list_reverse([1, 2, 3]) == [3, 2, 1] &&
+    list_reverse(["foo", "bar", "baz"]) == ["baz", "bar", "foo"] &&
+    list_reverse([true, false]) == [false, true] &&
+    list_reverse([1, "foo", false]) == [false, "foo", 1]
 then
     trigger_test();
 end
