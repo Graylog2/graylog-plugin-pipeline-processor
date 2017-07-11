@@ -54,7 +54,9 @@ import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddressConversion;
 import org.graylog.plugins.pipelineprocessor.functions.json.JsonParse;
 import org.graylog.plugins.pipelineprocessor.functions.json.SelectJsonPath;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListContains;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListIndexOf;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListIsEmpty;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListLastIndexOf;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemove;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAt;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListReverse;
@@ -135,6 +137,8 @@ public class ProcessorFunctionsModule extends PluginModule {
 
         // list functions
         addMessageProcessorFunction(ListContains.NAME, ListContains.class);
+        addMessageProcessorFunction(ListIndexOf.NAME, ListIndexOf.class);
+        addMessageProcessorFunction(ListLastIndexOf.NAME, ListLastIndexOf.class);
         addMessageProcessorFunction(ListIsEmpty.NAME, ListIsEmpty.class);
         addMessageProcessorFunction(ListReverse.NAME, ListReverse.class);
         addMessageProcessorFunction(ListRemoveAt.NAME, ListRemoveAt.class);

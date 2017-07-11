@@ -6,6 +6,14 @@ when
     list_contains(["foo", 23, false], 23) &&
     !list_contains(["foo"], 23) &&
     !list_contains([], 23) &&
+    list_index_of(["foo", "bar"], "foo") == 0 &&
+    list_index_of(["foo", "bar"], "bar") == 1 &&
+    list_index_of(["foo", "foo", "foo"], "foo") == 0 &&
+    list_index_of([1, 2], "foo") == -1 &&
+    list_last_index_of(["foo", "bar"], "foo") == 0 &&
+    list_last_index_of(["foo", "bar"], "bar") == 1 &&
+    list_last_index_of(["foo", "foo", "foo"], "foo") == 2 &&
+    list_last_index_of([1, 2], "foo") == -1 &&
     list_is_empty([]) &&
     !list_is_empty(["foo"]) &&
     list_reverse([]) == [] &&

@@ -59,7 +59,9 @@ import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddressConversion;
 import org.graylog.plugins.pipelineprocessor.functions.json.JsonParse;
 import org.graylog.plugins.pipelineprocessor.functions.json.SelectJsonPath;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListContains;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListIndexOf;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListIsEmpty;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListLastIndexOf;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemove;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAt;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListReverse;
@@ -236,6 +238,8 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         functions.put(SyslogLevelConversion.NAME, new SyslogLevelConversion());
 
         functions.put(ListContains.NAME, new ListContains());
+        functions.put(ListIndexOf.NAME, new ListIndexOf());
+        functions.put(ListLastIndexOf.NAME, new ListLastIndexOf());
         functions.put(ListIsEmpty.NAME, new ListIsEmpty());
         functions.put(ListReverse.NAME, new ListReverse());
         functions.put(ListRemoveAt.NAME, new ListRemoveAt());
