@@ -66,6 +66,7 @@ import org.graylog.plugins.pipelineprocessor.functions.lists.ListLastIndexOf;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemove;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAt;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRetainAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListReverse;
 import org.graylog.plugins.pipelineprocessor.functions.messages.CloneMessage;
 import org.graylog.plugins.pipelineprocessor.functions.messages.CreateMessage;
@@ -248,6 +249,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         functions.put(ListRemoveAt.NAME, new ListRemoveAt());
         functions.put(ListRemove.NAME, new ListRemove());
         functions.put(ListRemoveAll.NAME, new ListRemoveAll());
+        functions.put(ListRetainAll.NAME, new ListRetainAll());
 
         functions.put(UrlConversion.NAME, new UrlConversion());
 
