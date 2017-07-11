@@ -38,7 +38,13 @@ when
     list_remove(["foo", "bar", "baz"], "foo") == ["bar", "baz"] &&
     list_remove(["foo", "foo", "foo"], "foo") == [] &&
     list_remove(["foo", "bar"], "baz") == ["foo", "bar"] &&
-    list_remove([], "foo") == []
+    list_remove([], "foo") == [] &&
+    list_remove_all(["foo", "bar", "baz"], ["foo"]) == ["bar", "baz"] &&
+    list_remove_all(["foo", "bar", "baz"], ["foo", "bar"]) == ["baz"] &&
+    list_remove_all(["foo", "bar", "baz"], ["foo", "bar", "baz"]) == [] &&
+    list_remove_all(["foo", "foo", "foo"], ["foo"]) == [] &&
+    list_remove_all(["foo", "bar"], ["baz"]) == ["foo", "bar"] &&
+    list_remove_all([], ["foo"]) == []
 then
     trigger_test();
 end
