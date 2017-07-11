@@ -25,6 +25,9 @@ when
     list_last_index_of([1, 2], "foo") == -1 &&
     list_is_empty([]) &&
     !list_is_empty(["foo"]) &&
+    list_size([]) == 0 &&
+    list_size(["foo"]) == 1 &&
+    list_size(["foo", "bar", 1, 2, true, false]) == 6 &&
     list_reverse([]) == [] &&
     list_reverse([1, 2, 3]) == [3, 2, 1] &&
     list_reverse(["foo", "bar", "baz"]) == ["baz", "bar", "foo"] &&

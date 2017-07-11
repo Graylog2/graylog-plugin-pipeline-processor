@@ -63,6 +63,7 @@ import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAt;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRetainAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListReverse;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListSize;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListSubList;
 import org.graylog.plugins.pipelineprocessor.functions.lookup.Lookup;
 import org.graylog.plugins.pipelineprocessor.functions.lookup.LookupValue;
@@ -145,6 +146,7 @@ public class ProcessorFunctionsModule extends PluginModule {
         addMessageProcessorFunction(ListIndexOf.NAME, ListIndexOf.class);
         addMessageProcessorFunction(ListLastIndexOf.NAME, ListLastIndexOf.class);
         addMessageProcessorFunction(ListIsEmpty.NAME, ListIsEmpty.class);
+        addMessageProcessorFunction(ListSize.NAME, ListSize.class);
         addMessageProcessorFunction(ListReverse.NAME, ListReverse.class);
         addMessageProcessorFunction(ListRemoveAt.NAME, ListRemoveAt.class);
         addMessageProcessorFunction(ListRemove.NAME, ListRemove.class);

@@ -68,6 +68,7 @@ import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAt;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListRetainAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListReverse;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListSize;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListSubList;
 import org.graylog.plugins.pipelineprocessor.functions.messages.CloneMessage;
 import org.graylog.plugins.pipelineprocessor.functions.messages.CreateMessage;
@@ -246,6 +247,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         functions.put(ListIndexOf.NAME, new ListIndexOf());
         functions.put(ListLastIndexOf.NAME, new ListLastIndexOf());
         functions.put(ListIsEmpty.NAME, new ListIsEmpty());
+        functions.put(ListSize.NAME, new ListSize());
         functions.put(ListReverse.NAME, new ListReverse());
         functions.put(ListRemoveAt.NAME, new ListRemoveAt());
         functions.put(ListRemove.NAME, new ListRemove());
