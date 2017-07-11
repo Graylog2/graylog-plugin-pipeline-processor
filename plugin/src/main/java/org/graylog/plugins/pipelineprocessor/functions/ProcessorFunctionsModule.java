@@ -54,6 +54,7 @@ import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddressConversion;
 import org.graylog.plugins.pipelineprocessor.functions.json.JsonParse;
 import org.graylog.plugins.pipelineprocessor.functions.json.SelectJsonPath;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListContains;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListContainsAll;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListIndexOf;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListIsEmpty;
 import org.graylog.plugins.pipelineprocessor.functions.lists.ListLastIndexOf;
@@ -137,6 +138,7 @@ public class ProcessorFunctionsModule extends PluginModule {
 
         // list functions
         addMessageProcessorFunction(ListContains.NAME, ListContains.class);
+        addMessageProcessorFunction(ListContainsAll.NAME, ListContainsAll.class);
         addMessageProcessorFunction(ListIndexOf.NAME, ListIndexOf.class);
         addMessageProcessorFunction(ListLastIndexOf.NAME, ListLastIndexOf.class);
         addMessageProcessorFunction(ListIsEmpty.NAME, ListIsEmpty.class);

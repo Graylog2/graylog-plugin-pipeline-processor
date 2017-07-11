@@ -6,6 +6,15 @@ when
     list_contains(["foo", 23, false], 23) &&
     !list_contains(["foo"], 23) &&
     !list_contains([], 23) &&
+    list_contains_all(["foo", "bar"], ["foo"]) &&
+    list_contains_all(["foo", "bar"], ["foo", "bar"]) &&
+    list_contains_all([1, 2, 3], [1]) &&
+    list_contains_all([1, 2, 3], [1, 2]) &&
+    list_contains_all([true, false], [true]) &&
+    list_contains_all(["foo", 23, false], ["foo", 23]) &&
+    list_contains_all([], []) &&
+    !list_contains_all(["foo"], [23]) &&
+    !list_contains_all([], [23]) &&
     list_index_of(["foo", "bar"], "foo") == 0 &&
     list_index_of(["foo", "bar"], "bar") == 1 &&
     list_index_of(["foo", "foo", "foo"], "foo") == 0 &&
