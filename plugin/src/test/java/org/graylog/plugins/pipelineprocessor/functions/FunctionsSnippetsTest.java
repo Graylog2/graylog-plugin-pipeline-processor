@@ -362,7 +362,13 @@ public class FunctionsSnippetsTest extends BaseParserTest {
             assertNotNull(message);
             assertTrue(message.hasField("matched_regex"));
             assertTrue(message.hasField("group_1"));
+            assertTrue(message.hasField("group_2a"));
+            assertTrue(message.hasField("group_2b"));
+            assertTrue(message.hasField("named_abc1"));
+            assertTrue(message.hasField("named_abc2"));
             assertThat((String) message.getField("named_group")).isEqualTo("cd.e");
+            assertThat((String) message.getField("named_abc1")).isEqualTo("abc");
+            assertThat((String) message.getField("named_abc2")).isEqualTo("abc");
         } catch (ParseException e) {
             Assert.fail("Should parse");
         }

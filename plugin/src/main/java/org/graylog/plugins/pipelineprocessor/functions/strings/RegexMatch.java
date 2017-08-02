@@ -28,7 +28,6 @@ import org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,9 +59,8 @@ public class RegexMatch extends AbstractFunction<RegexMatch.RegexMatchResult> {
                 (List<String>) optionalGroupNames.optional(args, context).orElse(Collections.emptyList());
 
         final Matcher matcher = regex.matcher(value);
-        final boolean matches = matcher.find();
 
-        return new RegexMatchResult(matches, matcher.toMatchResult(), groupNames);
+        return new RegexMatchResult(matcher, groupNames);
 
     }
 
@@ -87,34 +85,21 @@ public class RegexMatch extends AbstractFunction<RegexMatch.RegexMatchResult> {
      * At the same time there's an additional <code>matches</code> bean property to quickly check whether the regex has matched at all.
      */
     public static class RegexMatchResult extends ForwardingMap<String, String> {
-        private final boolean matches;
         private final ImmutableMap<String, String> groups;
 
-        public RegexMatchResult(boolean matches, MatchResult matchResult, List<String> groupNames) {
-            this.matches = matches;
-            ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder();
-
-            if (matches) {
-                // arggggh! not 0 based.
-                final int groupCount = matchResult.groupCount();
-                for (int i = 1; i <= groupCount; i++) {
-                    final String groupValue = matchResult.group(i);
-
-                    if (groupValue == null) {
-                        // You cannot add null values to an ImmutableMap but optional matcher groups may be null.
-                        continue;
-                    }
-
-                    // try to get a group name, if that fails use a 0-based index as the name
-                    final String groupName = Iterables.get(groupNames, i - 1, null);
-                    builder.put(groupName != null ? groupName : String.valueOf(i - 1), groupValue);
-                }
+        public RegexMatchResult(Matcher matcher, List<String> groupNames) {
+            final ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder();
+            for (int i = 0; matcher.find(); i++) {
+                final String group = matcher.group();
+                final String groupName = Iterables.get(groupNames, i, String.valueOf(i));
+                builder.put(groupName, group);
             }
-            groups = builder.build();
+
+            this.groups = builder.build();
         }
 
         public boolean isMatches() {
-            return matches;
+            return !groups.isEmpty();
         }
 
         public Map<String, String> getGroups() {
