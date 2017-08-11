@@ -17,5 +17,11 @@ then
         with_spaces: url.queryParams.with_spaces,
         equal: url.queryParams.equal
     });
+
+    // https://github.com/Graylog2/graylog-plugin-pipeline-processor/issues/207
+    let url_query_with_dot = to_url("https://example.com/path.dot?query.with=dot#fragment.dot");
+    set_field("url_query_with_dot", url_query_with_dot.query);
+    set_field("url_query_with_dot_param", url_query_with_dot.queryParams.`query.with`);
+
     trigger_test();
 end

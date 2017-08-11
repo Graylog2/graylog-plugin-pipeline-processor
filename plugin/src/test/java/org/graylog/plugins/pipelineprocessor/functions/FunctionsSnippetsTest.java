@@ -532,6 +532,9 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat(message.getField("with_spaces")).isEqualTo("hello graylog");
         assertThat(message.getField("equal")).isEqualTo("can=containanotherone");
         assertThat(message.getField("authority")).isEqualTo("admin:s3cr31@some.host.with.lots.of.subdomains.com:9999");
+
+        assertThat(message.getField("url_query_with_dot")).isEqualTo("query.with=dot");
+        assertThat(message.getField("url_query_with_dot_param")).isEqualTo("dot");
     }
 
     @Test
