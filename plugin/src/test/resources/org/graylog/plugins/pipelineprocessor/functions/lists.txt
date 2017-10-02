@@ -1,0 +1,71 @@
+rule "list tests"
+when
+    list_add([], "foo") == ["foo"] &&
+    list_add(["foo", "bar"], "baz") == ["foo", "bar", "baz"] &&
+    list_add(["foo"], 1) == ["foo", 1] &&
+    list_add_all([], ["foo"]) == ["foo"] &&
+    list_add_all(["foo"], ["bar", "baz"]) == ["foo", "bar", "baz"] &&
+    list_add_all(["foo"], []) == ["foo"] &&
+    list_add_all(["foo"], [1, true]) == ["foo", 1, true] &&
+    list_contains(["foo", "bar"], "foo") &&
+    list_contains([1, 2, 3], 2) &&
+    list_contains([true, false], true) &&
+    list_contains(["foo", 23, false], 23) &&
+    !list_contains(["foo"], 23) &&
+    !list_contains([], 23) &&
+    list_contains_all(["foo", "bar"], ["foo"]) &&
+    list_contains_all(["foo", "bar"], ["foo", "bar"]) &&
+    list_contains_all([1, 2, 3], [1]) &&
+    list_contains_all([1, 2, 3], [1, 2]) &&
+    list_contains_all([true, false], [true]) &&
+    list_contains_all(["foo", 23, false], ["foo", 23]) &&
+    list_contains_all([], []) &&
+    !list_contains_all(["foo"], [23]) &&
+    !list_contains_all([], [23]) &&
+    list_index_of(["foo", "bar"], "foo") == 0 &&
+    list_index_of(["foo", "bar"], "bar") == 1 &&
+    list_index_of(["foo", "foo", "foo"], "foo") == 0 &&
+    list_index_of([1, 2], "foo") == -1 &&
+    list_last_index_of(["foo", "bar"], "foo") == 0 &&
+    list_last_index_of(["foo", "bar"], "bar") == 1 &&
+    list_last_index_of(["foo", "foo", "foo"], "foo") == 2 &&
+    list_last_index_of([1, 2], "foo") == -1 &&
+    list_is_empty([]) &&
+    !list_is_empty(["foo"]) &&
+    list_size([]) == 0 &&
+    list_size(["foo"]) == 1 &&
+    list_size(["foo", "bar", 1, 2, true, false]) == 6 &&
+    list_reverse([]) == [] &&
+    list_reverse([1, 2, 3]) == [3, 2, 1] &&
+    list_reverse(["foo", "bar", "baz"]) == ["baz", "bar", "foo"] &&
+    list_reverse([true, false]) == [false, true] &&
+    list_reverse([1, "foo", false]) == [false, "foo", 1] &&
+    list_remove_at([1, 2, 3], 0) == [2, 3] &&
+    list_remove_at([1, 2, 3], 1) == [1, 3] &&
+    list_remove_at([1, 2, 3], 2) == [1, 2] &&
+    list_remove_at([1], 5) == [1] &&
+    list_remove_at([], 0) == [] &&
+    list_remove(["foo", "bar", "baz"], "foo") == ["bar", "baz"] &&
+    list_remove(["foo", "foo", "foo"], "foo") == [] &&
+    list_remove(["foo", "bar"], "baz") == ["foo", "bar"] &&
+    list_remove([], "foo") == [] &&
+    list_remove_all(["foo", "bar", "baz"], ["foo"]) == ["bar", "baz"] &&
+    list_remove_all(["foo", "bar", "baz"], ["foo", "bar"]) == ["baz"] &&
+    list_remove_all(["foo", "bar", "baz"], ["foo", "bar", "baz"]) == [] &&
+    list_remove_all(["foo", "foo", "foo"], ["foo"]) == [] &&
+    list_remove_all(["foo", "bar"], ["baz"]) == ["foo", "bar"] &&
+    list_remove_all([], ["foo"]) == [] &&
+    list_retain_all(["foo", "bar", "baz"], ["foo"]) == ["foo"] &&
+    list_retain_all(["foo", "bar", "baz"], ["foo", "bar"]) == ["foo", "bar"] &&
+    list_retain_all(["foo", "bar", "baz"], ["foo", "bar", "baz"]) == ["foo", "bar", "baz"] &&
+    list_retain_all(["foo", "foo", "foo"], ["foo"]) == ["foo", "foo", "foo"] &&
+    list_retain_all(["foo", "bar"], ["baz"]) == [] &&
+    list_retain_all(["foo", "bar"], []) == [] &&
+    list_retain_all([], ["foo"]) == [] &&
+    sub_list([], 0, 0) == [] &&
+    sub_list([], 0, 100) == [] &&
+    sub_list([1, 2, 3], 90, 100) == [1, 2, 3] &&
+    sub_list([1, 2, 3], 1, 3) == [2, 3]
+then
+    trigger_test();
+end

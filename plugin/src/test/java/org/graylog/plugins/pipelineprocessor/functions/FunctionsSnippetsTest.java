@@ -68,6 +68,20 @@ import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddress;
 import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddressConversion;
 import org.graylog.plugins.pipelineprocessor.functions.json.JsonParse;
 import org.graylog.plugins.pipelineprocessor.functions.json.SelectJsonPath;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListAdd;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListAddAll;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListContains;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListContainsAll;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListIndexOf;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListIsEmpty;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListLastIndexOf;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemove;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAll;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAt;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRetainAll;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListReverse;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListSize;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListSubList;
 import org.graylog.plugins.pipelineprocessor.functions.messages.CloneMessage;
 import org.graylog.plugins.pipelineprocessor.functions.messages.CreateMessage;
 import org.graylog.plugins.pipelineprocessor.functions.messages.DropMessage;
@@ -251,6 +265,21 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         functions.put(SyslogFacilityConversion.NAME, new SyslogFacilityConversion());
         functions.put(SyslogLevelConversion.NAME, new SyslogLevelConversion());
 
+        functions.put(ListAdd.NAME, new ListAdd());
+        functions.put(ListAddAll.NAME, new ListAddAll());
+        functions.put(ListContains.NAME, new ListContains());
+        functions.put(ListContainsAll.NAME, new ListContainsAll());
+        functions.put(ListIndexOf.NAME, new ListIndexOf());
+        functions.put(ListLastIndexOf.NAME, new ListLastIndexOf());
+        functions.put(ListIsEmpty.NAME, new ListIsEmpty());
+        functions.put(ListSize.NAME, new ListSize());
+        functions.put(ListReverse.NAME, new ListReverse());
+        functions.put(ListRemoveAt.NAME, new ListRemoveAt());
+        functions.put(ListRemove.NAME, new ListRemove());
+        functions.put(ListRemoveAll.NAME, new ListRemoveAll());
+        functions.put(ListRetainAll.NAME, new ListRetainAll());
+        functions.put(ListSubList.NAME, new ListSubList());
+
         functions.put(UrlConversion.NAME, new UrlConversion());
 
         final GrokPatternService grokPatternService = mock(GrokPatternService.class);
@@ -406,6 +435,15 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat((boolean) message.getField("has_xyz")).isFalse();
         assertThat(message.getField("string_literal")).isInstanceOf(String.class);
         assertThat((String) message.getField("string_literal")).isEqualTo("abcd\\.e\tfg\u03a9\363");
+    }
+
+    @Test
+    public void lists() {
+        final Rule rule = parser.parseRule(ruleForTest(), false);
+        final Message message = evaluateRule(rule);
+
+        assertThat(actionsTriggered.get()).isTrue();
+        assertThat(message).isNotNull();
     }
 
     @Test

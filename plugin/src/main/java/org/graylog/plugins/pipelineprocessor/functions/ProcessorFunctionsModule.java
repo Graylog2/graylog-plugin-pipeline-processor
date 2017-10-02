@@ -62,6 +62,20 @@ import org.graylog.plugins.pipelineprocessor.functions.ips.CidrMatch;
 import org.graylog.plugins.pipelineprocessor.functions.ips.IpAddressConversion;
 import org.graylog.plugins.pipelineprocessor.functions.json.JsonParse;
 import org.graylog.plugins.pipelineprocessor.functions.json.SelectJsonPath;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListAdd;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListAddAll;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListContains;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListContainsAll;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListIndexOf;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListIsEmpty;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListLastIndexOf;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemove;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAll;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRemoveAt;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListRetainAll;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListReverse;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListSize;
+import org.graylog.plugins.pipelineprocessor.functions.lists.ListSubList;
 import org.graylog.plugins.pipelineprocessor.functions.lookup.Lookup;
 import org.graylog.plugins.pipelineprocessor.functions.lookup.LookupValue;
 import org.graylog.plugins.pipelineprocessor.functions.messages.CloneMessage;
@@ -136,6 +150,22 @@ public class ProcessorFunctionsModule extends PluginModule {
         addMessageProcessorFunction(Concat.NAME, Concat.class);
         addMessageProcessorFunction(KeyValue.NAME, KeyValue.class);
         addMessageProcessorFunction(Split.NAME, Split.class);
+
+        // list functions
+        addMessageProcessorFunction(ListAdd.NAME, ListAdd.class);
+        addMessageProcessorFunction(ListAddAll.NAME, ListAddAll.class);
+        addMessageProcessorFunction(ListContains.NAME, ListContains.class);
+        addMessageProcessorFunction(ListContainsAll.NAME, ListContainsAll.class);
+        addMessageProcessorFunction(ListIndexOf.NAME, ListIndexOf.class);
+        addMessageProcessorFunction(ListLastIndexOf.NAME, ListLastIndexOf.class);
+        addMessageProcessorFunction(ListIsEmpty.NAME, ListIsEmpty.class);
+        addMessageProcessorFunction(ListSize.NAME, ListSize.class);
+        addMessageProcessorFunction(ListReverse.NAME, ListReverse.class);
+        addMessageProcessorFunction(ListRemoveAt.NAME, ListRemoveAt.class);
+        addMessageProcessorFunction(ListRemove.NAME, ListRemove.class);
+        addMessageProcessorFunction(ListRemoveAll.NAME, ListRemoveAll.class);
+        addMessageProcessorFunction(ListRetainAll.NAME, ListRetainAll.class);
+        addMessageProcessorFunction(ListSubList.NAME, ListSubList.class);
 
         // json
         addMessageProcessorFunction(JsonParse.NAME, JsonParse.class);
