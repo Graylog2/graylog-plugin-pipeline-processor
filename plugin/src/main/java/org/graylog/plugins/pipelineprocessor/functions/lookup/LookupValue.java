@@ -57,7 +57,7 @@ public class LookupValue extends AbstractFunction<Object> {
         //noinspection unchecked
         return FunctionDescriptor.builder()
                 .name(NAME)
-                .description("Looks a single value up in the named lookup table.")
+                .description("Looks up a single value in the named lookup table.")
                 .params(lookupTableParam, keyParam, defaultParam)
                 .returnType(Object.class)
                 .build();
