@@ -652,16 +652,25 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         // special case, Message doesn't allow adding fields with empty string values
         assertThat(message.hasField("string_3")).isFalse();
         assertThat(message.getField("string_4")).isEqualTo("default");
+        assertThat(message.getField("string_5")).isEqualTo("false");
+        assertThat(message.getField("string_6")).isEqualTo("42");
+        assertThat(message.getField("string_7")).isEqualTo("23.42");
 
         assertThat(message.getField("long_1")).isEqualTo(1L);
         assertThat(message.getField("long_2")).isEqualTo(2L);
         assertThat(message.getField("long_3")).isEqualTo(0L);
         assertThat(message.getField("long_4")).isEqualTo(1L);
+        assertThat(message.getField("long_5")).isEqualTo(23L);
+        assertThat(message.getField("long_6")).isEqualTo(23L);
+        assertThat(message.getField("long_7")).isEqualTo(1L);
 
         assertThat(message.getField("double_1")).isEqualTo(1d);
         assertThat(message.getField("double_2")).isEqualTo(2d);
         assertThat(message.getField("double_3")).isEqualTo(0d);
         assertThat(message.getField("double_4")).isEqualTo(1d);
+        assertThat(message.getField("double_5")).isEqualTo(23d);
+        assertThat(message.getField("double_6")).isEqualTo(23d);
+        assertThat(message.getField("double_7")).isEqualTo(23.42d);
 
         assertThat(message.getField("bool_1")).isEqualTo(true);
         assertThat(message.getField("bool_2")).isEqualTo(false);
