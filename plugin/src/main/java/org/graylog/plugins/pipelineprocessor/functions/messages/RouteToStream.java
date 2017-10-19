@@ -17,19 +17,21 @@
 package org.graylog.plugins.pipelineprocessor.functions.messages;
 
 import com.google.inject.Inject;
-
 import org.graylog.plugins.pipelineprocessor.EvaluationContext;
 import org.graylog.plugins.pipelineprocessor.ast.functions.AbstractFunction;
 import org.graylog.plugins.pipelineprocessor.ast.functions.FunctionArgs;
 import org.graylog.plugins.pipelineprocessor.ast.functions.FunctionDescriptor;
 import org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor;
 import org.graylog2.plugin.Message;
+import org.graylog2.plugin.streams.DefaultStream;
 import org.graylog2.plugin.streams.Stream;
 
+import javax.inject.Provider;
 import java.util.Collection;
 import java.util.Collections;
 
 import static com.google.common.collect.ImmutableList.of;
+import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.bool;
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.string;
 import static org.graylog.plugins.pipelineprocessor.ast.functions.ParameterDescriptor.type;
 
@@ -38,18 +40,23 @@ public class RouteToStream extends AbstractFunction<Void> {
     public static final String NAME = "route_to_stream";
     private static final String ID_ARG = "id";
     private static final String NAME_ARG = "name";
+    private static final String REMOVE_FROM_DEFAULT = "remove_from_default";
     private final StreamCacheService streamCacheService;
+    private final Provider<Stream> defaultStreamProvider;
     private final ParameterDescriptor<Message, Message> messageParam;
     private final ParameterDescriptor<String, String> nameParam;
     private final ParameterDescriptor<String, String> idParam;
+    private final ParameterDescriptor<Boolean, Boolean> removeFromDefault;
 
     @Inject
-    public RouteToStream(StreamCacheService streamCacheService) {
+    public RouteToStream(StreamCacheService streamCacheService, @DefaultStream Provider<Stream> defaultStreamProvider) {
         this.streamCacheService = streamCacheService;
+        this.defaultStreamProvider = defaultStreamProvider;
 
         messageParam = type("message", Message.class).optional().description("The message to use, defaults to '$message'").build();
         nameParam = string(NAME_ARG).optional().description("The name of the stream to route the message to, must match exactly").build();
         idParam = string(ID_ARG).optional().description("The ID of the stream").build();
+        removeFromDefault = bool(REMOVE_FROM_DEFAULT).optional().description("After routing the message, remove it from the default stream").build();
     }
 
     @Override
@@ -80,6 +87,9 @@ public class RouteToStream extends AbstractFunction<Void> {
                 message.addStream(stream);
             }
         });
+        if (removeFromDefault.optional(args, context).orElse(Boolean.FALSE)) {
+            message.removeStream(defaultStreamProvider.get());
+        }
         return null;
     }
 
@@ -91,7 +101,8 @@ public class RouteToStream extends AbstractFunction<Void> {
                 .params(of(
                         nameParam,
                         idParam,
-                        messageParam))
+                        messageParam,
+                        removeFromDefault))
                 .description("Routes a message to a stream")
                 .build();
     }

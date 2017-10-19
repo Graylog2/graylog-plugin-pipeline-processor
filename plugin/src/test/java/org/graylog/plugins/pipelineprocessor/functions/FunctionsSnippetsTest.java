@@ -117,6 +117,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 
+import javax.inject.Provider;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -157,28 +158,29 @@ public class FunctionsSnippetsTest extends BaseParserTest {
 
         // route to stream mocks
         final StreamService streamService = mock(StreamService.class);
-        final Stream stream = mock(Stream.class);
-        when(stream.isPaused()).thenReturn(false);
-        when(stream.getTitle()).thenReturn("some name");
-        when(stream.getId()).thenReturn("id");
+        final Stream defaultStream = mock(Stream.class);
+        when(defaultStream.isPaused()).thenReturn(false);
+        when(defaultStream.getTitle()).thenReturn("some name");
+        when(defaultStream.getId()).thenReturn(Stream.DEFAULT_STREAM_ID);
 
         final Stream stream2 = mock(Stream.class);
         when(stream2.isPaused()).thenReturn(false);
         when(stream2.getTitle()).thenReturn("some name");
         when(stream2.getId()).thenReturn("id2");
 
-        when(streamService.loadAll()).thenReturn(Lists.newArrayList(stream, stream2));
-        when(streamService.loadAllEnabled()).thenReturn(Lists.newArrayList(stream, stream2));
+        when(streamService.loadAll()).thenReturn(Lists.newArrayList(defaultStream, stream2));
+        when(streamService.loadAllEnabled()).thenReturn(Lists.newArrayList(defaultStream, stream2));
         try {
             when(streamService.load(anyString())).thenThrow(new NotFoundException());
-            when(streamService.load(ArgumentMatchers.eq("id"))).thenReturn(stream);
+            when(streamService.load(ArgumentMatchers.eq("id"))).thenReturn(defaultStream);
             when(streamService.load(ArgumentMatchers.eq("id2"))).thenReturn(stream2);
         } catch (NotFoundException ignored) {
             // oh well, checked exceptions <3
         }
         streamCacheService = new StreamCacheService(eventBus, streamService, null);
         streamCacheService.startAsync().awaitRunning();
-        functions.put(RouteToStream.NAME, new RouteToStream(streamCacheService));
+        final Provider<Stream> defaultStreamProvider = () -> defaultStream;
+        functions.put(RouteToStream.NAME, new RouteToStream(streamCacheService, defaultStreamProvider));
 
         // input related functions
         // TODO needs mock
@@ -809,5 +811,21 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         final Message message2 = evaluateRule(rule);
         assertThat(message2).isNotNull();
         assertThat(message2.getStreams().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void routeToStreamRemoveDefault() {
+        final Rule rule = parser.parseRule(ruleForTest(), true);
+        final Message message = evaluateRule(rule);
+
+        assertThat(message).isNotNull();
+        assertThat(message.getStreams()).isNotEmpty();
+        assertThat(message.getStreams().size()).isEqualTo(1);
+
+        streamCacheService.updateStreams(ImmutableSet.of("id"));
+
+        final Message message2 = evaluateRule(rule);
+        assertThat(message2).isNotNull();
+        assertThat(message2.getStreams().size()).isEqualTo(1);
     }
 }
