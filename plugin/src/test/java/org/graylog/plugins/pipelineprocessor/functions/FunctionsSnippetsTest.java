@@ -73,6 +73,7 @@ import org.graylog.plugins.pipelineprocessor.functions.messages.CreateMessage;
 import org.graylog.plugins.pipelineprocessor.functions.messages.DropMessage;
 import org.graylog.plugins.pipelineprocessor.functions.messages.HasField;
 import org.graylog.plugins.pipelineprocessor.functions.messages.RemoveField;
+import org.graylog.plugins.pipelineprocessor.functions.messages.RemoveFromStream;
 import org.graylog.plugins.pipelineprocessor.functions.messages.RenameField;
 import org.graylog.plugins.pipelineprocessor.functions.messages.RouteToStream;
 import org.graylog.plugins.pipelineprocessor.functions.messages.SetField;
@@ -135,6 +136,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
     public static final DateTime GRAYLOG_EPOCH = DateTime.parse("2010-07-30T16:03:25Z");
     private static final EventBus eventBus = new EventBus();
     private static StreamCacheService streamCacheService;
+    private static Stream otherStream;
 
     @BeforeClass
     public static void registerFunctions() {
@@ -158,22 +160,18 @@ public class FunctionsSnippetsTest extends BaseParserTest {
 
         // route to stream mocks
         final StreamService streamService = mock(StreamService.class);
-        final Stream defaultStream = mock(Stream.class);
-        when(defaultStream.isPaused()).thenReturn(false);
-        when(defaultStream.getTitle()).thenReturn("some name");
-        when(defaultStream.getId()).thenReturn(Stream.DEFAULT_STREAM_ID);
 
-        final Stream stream2 = mock(Stream.class);
-        when(stream2.isPaused()).thenReturn(false);
-        when(stream2.getTitle()).thenReturn("some name");
-        when(stream2.getId()).thenReturn("id2");
+        otherStream = mock(Stream.class, "some stream id2");
+        when(otherStream.isPaused()).thenReturn(false);
+        when(otherStream.getTitle()).thenReturn("some name");
+        when(otherStream.getId()).thenReturn("id2");
 
-        when(streamService.loadAll()).thenReturn(Lists.newArrayList(defaultStream, stream2));
-        when(streamService.loadAllEnabled()).thenReturn(Lists.newArrayList(defaultStream, stream2));
+        when(streamService.loadAll()).thenReturn(Lists.newArrayList(defaultStream, otherStream));
+        when(streamService.loadAllEnabled()).thenReturn(Lists.newArrayList(defaultStream, otherStream));
         try {
             when(streamService.load(anyString())).thenThrow(new NotFoundException());
-            when(streamService.load(ArgumentMatchers.eq("id"))).thenReturn(defaultStream);
-            when(streamService.load(ArgumentMatchers.eq("id2"))).thenReturn(stream2);
+            when(streamService.load(ArgumentMatchers.eq(Stream.DEFAULT_STREAM_ID))).thenReturn(defaultStream);
+            when(streamService.load(ArgumentMatchers.eq("id2"))).thenReturn(otherStream);
         } catch (NotFoundException ignored) {
             // oh well, checked exceptions <3
         }
@@ -181,7 +179,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         streamCacheService.startAsync().awaitRunning();
         final Provider<Stream> defaultStreamProvider = () -> defaultStream;
         functions.put(RouteToStream.NAME, new RouteToStream(streamCacheService, defaultStreamProvider));
-
+        functions.put(RemoveFromStream.NAME, new RemoveFromStream(streamCacheService, defaultStreamProvider));
         // input related functions
         // TODO needs mock
         //functions.put(FromInput.NAME, new FromInput());
@@ -822,10 +820,28 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat(message.getStreams()).isNotEmpty();
         assertThat(message.getStreams().size()).isEqualTo(1);
 
-        streamCacheService.updateStreams(ImmutableSet.of("id"));
+        streamCacheService.updateStreams(ImmutableSet.of(Stream.DEFAULT_STREAM_ID));
 
         final Message message2 = evaluateRule(rule);
         assertThat(message2).isNotNull();
         assertThat(message2.getStreams().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void removeFromStream() {
+        final Rule rule = parser.parseRule(ruleForTest(), true);
+        final Message message = evaluateRule(rule, msg -> msg.addStream(otherStream));
+
+        assertThat(message).isNotNull();
+        assertThat(message.getStreams()).containsOnly(defaultStream);
+    }
+
+    @Test
+    public void removeFromStreamRetainDefault() {
+        final Rule rule = parser.parseRule(ruleForTest(), true);
+        final Message message = evaluateRule(rule, msg -> msg.addStream(otherStream));
+
+        assertThat(message).isNotNull();
+        assertThat(message.getStreams()).containsOnly(defaultStream);
     }
 }
