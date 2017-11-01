@@ -112,7 +112,7 @@ const RuleForm = React.createClass({
   },
 
   _saved() {
-    history.pushState(null, Routes.pluginRoute('SYSTEM_PIPELINES_RULES'));
+    history.push(Routes.pluginRoute('SYSTEM_PIPELINES_RULES'));
   },
 
   _save() {
