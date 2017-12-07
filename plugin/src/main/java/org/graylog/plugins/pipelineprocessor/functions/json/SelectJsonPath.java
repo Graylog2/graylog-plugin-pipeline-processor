@@ -19,6 +19,7 @@ package org.graylog.plugins.pipelineprocessor.functions.json;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.google.inject.TypeLiteral;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -73,12 +74,14 @@ public class SelectJsonPath extends AbstractFunction<Map<String, Object>> {
         if (json == null || paths == null) {
             return Collections.emptyMap();
         }
+        // a plain .collect(toMap(...)) will fail on null values, because of the HashMap#merge method in its implementation
+        // since json nodes at certain paths might be missing, the value could be null.
+        // filter null values out first
         return paths
                 .entrySet().stream()
-                .collect(toMap(
-                        Map.Entry::getKey,
-                        e -> unwrapJsonNode(e.getValue().read(json, configuration))
-                ));
+                .map(entry -> Maps.immutableEntry(entry.getKey(), unwrapJsonNode(entry.getValue().read(json, configuration))))
+                .filter(entry -> entry.getValue() != null)
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private Object unwrapJsonNode(Object value) {
