@@ -3,12 +3,7 @@ import React from 'react';
 import { Button, Col, ControlLabel, FormControl, FormGroup, Row } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
-import AceEditor from 'react-ace';
-import brace from 'brace';
-
-import 'brace/mode/text';
-import 'brace/theme/chrome';
-
+import { SourceCodeEditor } from 'components/common';
 import { Input } from 'components/bootstrap';
 import Routes from 'routing/Routes';
 
@@ -175,20 +170,10 @@ const RuleForm = React.createClass({
           {pipelinesUsingRule}
 
           <Input id="rule-source-editor" label="Rule source" help="Rule source, see quick reference for more information.">
-            <div style={{ border: '1px solid lightgray', borderRadius: 5 }}>
-              <AceEditor
-                mode="text"
-                theme="chrome"
-                name={`source${this.props.create ? '-create' : '-edit'}`}
-                fontSize={11}
-                height="14em"
-                width="100%"
-                editorProps={{ $blockScrolling: 'Infinity' }}
-                value={this.state.rule.source}
-                onLoad={this._onLoad}
-                onChange={this._onSourceChange}
-              />
-            </div>
+            <SourceCodeEditor id={`source${this.props.create ? '-create' : '-edit'}`}
+                              value={this.state.rule.source}
+                              onLoad={this._onLoad}
+                              onChange={this._onSourceChange} />
           </Input>
         </fieldset>
 
