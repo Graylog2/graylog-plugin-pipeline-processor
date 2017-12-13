@@ -41,7 +41,6 @@ const RuleForm = React.createClass({
         description: rule.description,
         source: rule.source,
       },
-      editor: undefined,
       parseErrors: [],
     };
   },
@@ -55,16 +54,8 @@ const RuleForm = React.createClass({
 
   parseTimer: undefined,
 
-  _updateEditor() {
-    const session = this.state.editor.session;
-    const annotations = this.state.parseErrors.map(e => {
-      return { row: e.line - 1, column: e.position_in_line - 1, text: e.reason, type: 'error' };
-    });
-    session.setAnnotations(annotations);
-  },
-
   _setParseErrors(errors) {
-    this.setState({ parseErrors: errors }, this._updateEditor);
+    this.setState({ parseErrors: errors });
   },
 
   _onSourceChange(value) {
@@ -92,10 +83,6 @@ const RuleForm = React.createClass({
     const rule = this.state.rule;
     rule.title = event.target.value;
     this.setState({ rule });
-  },
-
-  _onLoad(editor) {
-    this.setState({ editor });
   },
 
   _getId(prefixIdName) {
@@ -151,6 +138,10 @@ const RuleForm = React.createClass({
       );
     }
 
+    const annotations = this.state.parseErrors.map(e => {
+      return { row: e.line - 1, column: e.position_in_line - 1, text: e.reason, type: 'error' };
+    });
+
     return (
       <form ref="form" onSubmit={this._submit}>
         <fieldset>
@@ -171,6 +162,7 @@ const RuleForm = React.createClass({
 
           <Input id="rule-source-editor" label="Rule source" help="Rule source, see quick reference for more information.">
             <SourceCodeEditor id={`source${this.props.create ? '-create' : '-edit'}`}
+                              annotations={annotations}
                               value={this.state.rule.source}
                               onLoad={this._onLoad}
                               onChange={this._onSourceChange} />
