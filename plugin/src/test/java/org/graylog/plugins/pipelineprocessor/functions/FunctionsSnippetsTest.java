@@ -670,6 +670,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         final EvaluationContext context = contextForRuleEval(rule, new Message("", "", Tools.nowUTC()));
         assertThat(context.hasEvaluationErrors()).isFalse();
         assertThat(evaluateRule(rule)).isNotNull();
+        assertThat(actionsTriggered.get()).isTrue();
     }
 
     @Test
