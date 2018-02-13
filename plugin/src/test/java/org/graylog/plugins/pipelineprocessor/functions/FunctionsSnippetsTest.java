@@ -30,6 +30,7 @@ import org.graylog.plugins.pipelineprocessor.ast.functions.Function;
 import org.graylog.plugins.pipelineprocessor.functions.conversion.BooleanConversion;
 import org.graylog.plugins.pipelineprocessor.functions.conversion.DoubleConversion;
 import org.graylog.plugins.pipelineprocessor.functions.conversion.LongConversion;
+import org.graylog.plugins.pipelineprocessor.functions.conversion.MapConversion;
 import org.graylog.plugins.pipelineprocessor.functions.conversion.StringConversion;
 import org.graylog.plugins.pipelineprocessor.functions.dates.DateConversion;
 import org.graylog.plugins.pipelineprocessor.functions.dates.FlexParseDate;
@@ -120,6 +121,7 @@ import org.mockito.ArgumentMatchers;
 
 import javax.inject.Provider;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -147,6 +149,7 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         functions.put(DoubleConversion.NAME, new DoubleConversion());
         functions.put(LongConversion.NAME, new LongConversion());
         functions.put(StringConversion.NAME, new StringConversion());
+        functions.put(MapConversion.NAME, new MapConversion());
 
         // message related functions
         functions.put(HasField.NAME, new HasField());
@@ -732,6 +735,12 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat(message.getField("ip_3")).isEqualTo(new IpAddress(InetAddresses.forString("0.0.0.0")));
         assertThat(message.getField("ip_4")).isEqualTo(new IpAddress(InetAddresses.forString("::1")));
 
+        assertThat(message.getField("map_1")).isEqualTo(Collections.singletonMap("foo", "bar"));
+        assertThat(message.getField("map_2")).isEqualTo(Collections.emptyMap());
+        assertThat(message.getField("map_3")).isEqualTo(Collections.emptyMap());
+        assertThat(message.getField("map_4")).isEqualTo(Collections.emptyMap());
+        assertThat(message.getField("map_5")).isEqualTo(Collections.emptyMap());
+        assertThat(message.getField("map_6")).isEqualTo(Collections.emptyMap());
     }
 
     @Test
