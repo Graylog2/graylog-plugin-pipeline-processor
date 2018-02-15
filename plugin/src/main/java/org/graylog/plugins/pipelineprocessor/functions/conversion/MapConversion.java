@@ -40,7 +40,7 @@ public class MapConversion extends AbstractFunction<Map> {
 
 
     public MapConversion() {
-        this.valueParam = object(VALUE).description("Value to convert").build();
+        this.valueParam = object(VALUE).description("Map-like value to convert").build();
     }
 
     @Override
@@ -65,7 +65,7 @@ public class MapConversion extends AbstractFunction<Map> {
                 .name(NAME)
                 .returnType(Map.class)
                 .params(of(valueParam))
-                .description("Converts a value to a long value using its string representation")
+                .description("Converts a map-like value into a map usable by set_fields()")
                 .build();
     }
 }
