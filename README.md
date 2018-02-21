@@ -1,4 +1,12 @@
-# PipelineProcessor Plugin for Graylog
+# DEPRECATION NOTICE
+
+This project has been merged into [graylog2-server](https://github.com/Graylog2/graylog2-server), see [#216](https://github.com/Graylog2/graylog-plugin-pipeline-processor/issues/216)
+
+Please use the [issue tracker in the graylog2-server repository](https://github.com/Graylog2/graylog2-server/issues) for any feature requests or bug reports.
+
+----
+
+# Pipeline Processor Plugin for Graylog
 
 [![Build Status](https://travis-ci.org/Graylog2/graylog-plugin-pipeline-processor.svg?branch=master)](https://travis-ci.org/Graylog2/graylog-plugin-pipeline-processor)
 
