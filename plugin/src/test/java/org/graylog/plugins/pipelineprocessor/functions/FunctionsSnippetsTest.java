@@ -845,4 +845,12 @@ public class FunctionsSnippetsTest extends BaseParserTest {
         assertThat(message).isNotNull();
         assertThat(message.getStreams()).containsOnly(defaultStream);
     }
+
+    @Test
+    public void int2ipv4() {
+        final Rule rule = parser.parseRule(ruleForTest(), true);
+        evaluateRule(rule);
+
+        assertThat(actionsTriggered.get()).isTrue();
+    }
 }
