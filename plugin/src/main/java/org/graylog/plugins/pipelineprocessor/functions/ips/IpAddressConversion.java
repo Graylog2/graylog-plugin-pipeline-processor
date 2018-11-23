@@ -44,11 +44,14 @@ public class IpAddressConversion extends AbstractFunction<IpAddress> {
 
     @Override
     public IpAddress evaluate(FunctionArgs args, EvaluationContext context) {
-        final String ipString = String.valueOf(ipParam.required(args, context));
-
+        final Object ip = ipParam.required(args, context);
         try {
-            final InetAddress inetAddress = InetAddresses.forString(ipString);
-            return new IpAddress(inetAddress);
+            if (ip instanceof Number) {
+                // this is only valid for IPv4 addresses, v6 requires 128 bits which we don't support
+                return new IpAddress(InetAddresses.fromInteger(((Number) ip).intValue()));
+            } else {
+                return new IpAddress(InetAddresses.forString(String.valueOf(ip)));
+            }
         } catch (IllegalArgumentException e) {
             final Optional<String> defaultValue = defaultParam.optional(args, context);
             if (!defaultValue.isPresent()) {
