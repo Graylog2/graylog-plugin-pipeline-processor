@@ -1,0 +1,8 @@
+rule "cidr_with_ipv6"
+when
+    cidr_match("10.0.0.0/8", to_ip("10.1.2.3")) &&
+    !cidr_match("10.0.0.0/8", to_ip("dummy")) &&
+    !cidr_match("10.0.0.0/8", to_ip("2001:db8::1"))
+then
+  trigger_test();
+end

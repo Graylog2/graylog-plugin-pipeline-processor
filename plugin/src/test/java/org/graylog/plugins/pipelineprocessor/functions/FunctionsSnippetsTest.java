@@ -623,6 +623,14 @@ public class FunctionsSnippetsTest extends BaseParserTest {
     }
 
     @Test
+    public void ipMatchingIssue5405() {
+        final Rule rule = parser.parseRule(ruleForTest(), false);
+        evaluateRule(rule);
+
+        assertThat(actionsTriggered.get()).isTrue();
+    }
+
+    @Test
     public void fieldRenaming() {
         final Rule rule = parser.parseRule(ruleForTest(), false);
 
